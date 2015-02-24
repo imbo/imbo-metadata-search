@@ -1,0 +1,24 @@
+{
+    "name": "imbo/imbo-metadata-search",
+    "description": "Metadata search plugin for Imbo",
+    "keywords": [ "metadata", "search", "imbo" ],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Kristoffer Brabrand",
+            "email": "kristoffer@brabrand.no"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/imbo/imbo-metadata-search",
+        "irc": "irc://irc.freenode.net/imbo"
+    },
+    "require": {
+        "php": ">=5.4.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Imbo\\MetadataSearch\\": "library/"
+        }
+    }
+}
