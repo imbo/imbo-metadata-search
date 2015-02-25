@@ -3,6 +3,7 @@
 namespace Imbo\MetadataSearch\EventListener;
 
 use Imbo\EventListener\ListenerInterface;
+use Imbo\EventManager\EventInterface;
 use Imbo\Exception\InvalidArgumentException;
 use Imbo\MetadataSearch\Interfaces\SearchBackendInterface;
 
@@ -35,27 +36,27 @@ class MetadataOperations implements ListenerInterface {
     /**
      * Partial metadata update (POST) handler
      *
-     * @param EventInterface $event The current event
+     * @param Imbo\EventListener\ListenerInterface $event The current event
      */
-    public function post($event) {
+    public function post(EventInterface $event) {
         // Post operation
     }
 
     /**
      * Add/replace metadata (PUT) handler
      *
-     * @param EventInterface $event The current event
+     * @param Imbo\EventListener\ListenerInterface $event The current event
      */
-    public function put($event) {
-        // Post operation
+    public function put(EventInterface $event) {
+        // Put operation
     }
 
     /**
      * Remove metadata (DELETE) handler
      *
-     * @param EventInterface $event The current event
+     * @param Imbo\EventListener\ListenerInterface $event The current event
      */
-    public function delete($event) {
-        // Post operation
+    public function delete(EventInterface $event) {
+        // Delete operation
     }
 }
