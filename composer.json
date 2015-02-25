@@ -1,0 +1,27 @@
+{
+    "name": "imbo/imbo-metadata-search",
+    "description": "Metadata search plugin for Imbo",
+    "keywords": [ "metadata", "search", "imbo" ],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Kristoffer Brabrand",
+            "email": "kristoffer@brabrand.no"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/imbo/imbo-metadata-search",
+        "irc": "irc://irc.freenode.net/imbo"
+    },
+    "require": {
+        "php": ">=5.4.0"
+    },
+    "suggest": {
+        "elasticsearch/elasticsearch": "Enables usage of elasticsearch as search backend. Recommended version: >=1.3.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Imbo\\MetadataSearch\\": "library/"
+        }
+    }
+}
