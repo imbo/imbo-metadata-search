@@ -16,6 +16,9 @@
     "require": {
         "php": ">=5.4.0"
     },
+    "suggest": {
+        "elasticsearch/elasticsearch": "Enables usage of elasticsearch as search backend. Recommended version: >=1.3.0"
+    },
     "autoload": {
         "psr-4": {
             "Imbo\\MetadataSearch\\": "library/"
