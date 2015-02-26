@@ -1,6 +1,18 @@
 <?php
 namespace Imbo\MetadataSearch\Dsl;
 
+use Imbo\MetadataSearch\Dsl\Ast\Conjunction
+  , Imbo\MetadataSearch\Dsl\Ast\Disjunction
+  , Imbo\MetadataSearch\Dsl\Ast\Field
+  , Imbo\MetadataSearch\Dsl\Ast\Comparison\Equals
+  , Imbo\MetadataSearch\Dsl\Ast\Comparison\NotEquals
+  , Imbo\MetadataSearch\Dsl\Ast\Comparison\In
+  , Imbo\MetadataSearch\Dsl\Ast\Comparison\NotIn
+  , Imbo\MetadataSearch\Dsl\Ast\Comparison\LessThan
+  , Imbo\MetadataSearch\Dsl\Ast\Comparison\LessThanEquals
+  , Imbo\MetadataSearch\Dsl\Ast\Comparison\GreaterThan
+  , Imbo\MetadataSearch\Dsl\Ast\Comparison\GreaterThanEquals;
+
 class Parser {
     /**
      * Valid expressions for metadata queries
@@ -54,9 +66,11 @@ class Parser {
             throw new \InvalidArgumentException('Query must be a JSON object or array', 400);
         }
 
-        $ast = self::lowercase($json);
+        $query = self::lowercase($json);
 
-        $ast = self::normalizeExpression($ast);
+        $normalizedQuery = self::normalizeExpression($query);
+
+        $ast = self::convertQueryToAst($normalizedQuery);
 
         return $ast;
     }
@@ -114,7 +128,7 @@ class Parser {
 
                 if (is_array($ast[$key])) {
                     // Now normalize the contents of the expressions
-                    $result[$key] = array_map(array('self', 'normalizeExpression'), $ast[$key]);
+                    $result[$key] = array_map(['self', 'normalizeExpression'], $ast[$key]);
                 } else {
                     // Our expression wasn't actually an expression, because it
                     // didn't have any parameters/data associated with it...
@@ -210,6 +224,55 @@ class Parser {
             // The field-operation is a simple equality-check, so we use it
             // as-is
             return [$field, $value];
+        }
+    }
+
+    /**
+     * Convert a normalized Mongo-subset query into an instance of our DSL AST
+     * @param array $query
+     * @return Imbo\MetadataSearch\Interfaces\DslAstInterface
+     */
+    private static function convertQueryToAst(array $query) {
+        $key = key($query);
+        $value = $query[$key];
+
+        switch ($key) {
+            case '$and':
+                return new Conjunction(array_map(['self', 'convertQueryToAst'], $value));
+            case '$or':
+                return new Disjunction(array_map(['self', 'convertQueryToAst'], $value));
+            default:
+                return new Field($key, self::convertFieldToAst($value));
+        }
+    }
+
+    /**
+     * Converts a field-value into an instance of our DSL AST comparison
+     * @param mixed $value
+     * @return Imbo\MetadataSearch\Interfaces\DslAstComparisonInterface
+     */
+    private static function convertFieldToAst($value) {
+        if (is_array($value)) {
+            $key = key($value);
+            $value = $value[$key];
+            switch ($key) {
+                case '$ne':
+                    return new NotEquals($value);
+                case '$in':
+                    return new In($value);
+                case '$nin':
+                    return new NotIn($value);
+                case '$lt':
+                    return new LessThan($value);
+                case '$lte':
+                    return new LessThanEquals($value);
+                case '$gt':
+                    return new GreaterThan($value);
+                case '$gte':
+                    return new GreaterThanEquals($value);
+            }
+        } else {
+            return new Equals($value);
         }
     }
 }
