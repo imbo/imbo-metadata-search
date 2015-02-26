@@ -37,7 +37,7 @@ class Parser {
      */
     public static function parse($input) {
         if (is_string($input)) {
-            $json = json_decode($input, TRUE);
+            $json = json_decode($input, true);
         } else {
             $json = $input;
         }
@@ -60,7 +60,6 @@ class Parser {
 
         return $ast;
     }
-  
 
     /**
      * Lowercases a query
@@ -72,19 +71,19 @@ class Parser {
      */
     private static function lowercase(array $query) {
         $result = array();
- 
+
         foreach ($query as $key => $value) {
             $key = strtolower($key);
- 
+
             if (is_array($value)) {
                 $value = self::lowercase($value);
             } else if (is_string($value)) {
                 $value = mb_strtolower($value, 'UTF-8');
             }
- 
+
             $result[$key] = $value;
         }
- 
+
         return $result;
     }
 
@@ -129,7 +128,9 @@ class Parser {
                 $result = array($key => $value);
             }
         } else {
-            // The expression 
+            // The expression wasn't normalized to only have one term in each
+            // expression, so we convert it into a $and-expression where each
+            // clause consists of one term. These terms are normalized too.
             $result = array('$and' => []);
             foreach ($ast AS $key => $node) {
                 $result['$and'][] = self::normalizeExpression(array($key => $node));
