@@ -2,12 +2,12 @@
 namespace Imbo\MetadataSearch\Dsl\Ast;
 
 use Imbo\MetadataSearch\Interfaces\DslAstInterface as AstNode
-  , Imbo\MetadataSearch\Interfaces\DslAstComparisonInterface as Ast_Comparison;
+  , Imbo\MetadataSearch\Interfaces\DslAstComparisonInterface as AstComparison;
 
 class Field implements AstNode {
     private $field;
     private $comparison;
-    public function __construct($field, Ast_Comparison $comparison) {
+    public function __construct($field, AstComparison $comparison) {
         $this->field = $field;
         $this->comparison = $comparison;
     }

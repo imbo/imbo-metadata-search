@@ -2,9 +2,9 @@
 
 namespace Imbo\MetadataSearch\Dsl\Ast\Comparison;
 
-use Imbo\MetadataSearch\Interfaces\DslAstComparisonInterface AS Ast_Comparison;
+use Imbo\MetadataSearch\Interfaces\DslAstComparisonInterface AS AstComparison;
 
-class Base implements Ast_Comparison {
+class Base implements AstComparison {
     private $value;
     public function __construct($value) {
         $this->value = $value;
