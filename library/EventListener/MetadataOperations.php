@@ -54,7 +54,7 @@ class MetadataOperations implements ListenerInterface {
         $request = $event->getRequest();
         $metadata = json_decode($request->getContent(), true);
 
-        $this->backend->setMetadata(
+        $this->backend->set(
             $request->getPublicKey(),
             $request->getImageIdentifier(),
             $metadata
