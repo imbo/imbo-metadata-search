@@ -40,7 +40,7 @@ interface SearchBackendInterface {
      * @param string $publicKey
      * @param Imbo\MetadataSearch\Interfaces/DslAstInterface $ast AST to base querying on
      * @param array $queryParams
-     * @return string[] Array with imageIdentifiers
+     * @return Imbo\MetadataSearch\Model\BackendResponse
      */
     public function search($publicKey, DslAstInterface $ast, array $queryParams);
 }
