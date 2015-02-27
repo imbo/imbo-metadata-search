@@ -6,7 +6,6 @@ use Imbo\EventListener\ListenerInterface;
 use Imbo\EventManager\EventInterface;
 use Imbo\Exception\InvalidArgumentException;
 use Imbo\MetadataSearch\Interfaces\SearchBackendInterface;
-use Imbo\Model;
 
 class MetadataOperations implements ListenerInterface {
     /**
