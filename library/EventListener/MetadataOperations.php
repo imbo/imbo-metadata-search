@@ -87,6 +87,8 @@ class MetadataOperations implements ListenerInterface {
      * @param string[] Array with image identifiers
      */
     public function search(EventInterface $event) {
+        $event->getManager()->trigger('checkAccessToken');
+
         $request = $event->getRequest();
 
         $params = $request->query;
