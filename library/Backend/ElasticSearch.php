@@ -50,7 +50,7 @@ class ElasticSearch implements SearchBackendInterface {
      * {@inheritdoc}
      */
     public function search($publicKey, DslAstInterface $ast, array $queryParams) {
-
+        // Transform $ast to ES query here, query and return imageIdentifers
     }
 
     /**
