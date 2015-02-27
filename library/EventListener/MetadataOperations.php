@@ -8,6 +8,11 @@ use Imbo\Exception\InvalidArgumentException;
 use Imbo\MetadataSearch\Interfaces\SearchBackendInterface;
 use Imbo\MetadataSearch\Dsl\Parser as DslParser;
 
+/**
+ * Metadata event listener
+ *
+ * @author Kristoffer Brabrand <kristoffer@brabrand.net>
+ */
 class MetadataOperations implements ListenerInterface {
     /**
      * Imbo\MetadataSearch\Interface\SearchBackendInterface
@@ -27,8 +32,6 @@ class MetadataOperations implements ListenerInterface {
     }
 
     public static function getSubscribedEvents() {
-        // Return event subscriptions and make sure
-        // they fire after anything else
         return [
             'metadata.post'   => ['post' => -1000],
             'metadata.put'    => ['put' => -1000],

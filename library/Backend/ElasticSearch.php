@@ -7,6 +7,11 @@ use Imbo\MetadataSearch\Interfaces\DslAstInterface;
 use Imbo\MetadataSearch\Model\BackendResponse;
 use Elasticsearch\Client as ElasticsearchClient;
 
+/**
+ * Elasticsearch search backend for metadata search
+ *
+ * @author Kristoffer Brabrand <kristoffer@brabrand.net>
+ */
 class ElasticSearch implements SearchBackendInterface {
     /**
      * @var Elasticsearch\Client
