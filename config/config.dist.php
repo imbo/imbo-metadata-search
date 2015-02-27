@@ -10,4 +10,13 @@ return [
             ])
         ],
     ],
+
+
+    'resources' => [
+        'search' => new Resource\Search(),
+    ],
+
+    'routes' => [
+        'search' => '#^/search(\.(?<extension>json|xml))?$#',
+    ],
 ];
