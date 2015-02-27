@@ -5,10 +5,9 @@ namespace Imbo\MetadataSearch;
 return [
     'eventListeners' => [
         'metadata' => [
-            'listener' => 'Imbo\MetadataSearch\EventListener\MetadataOperations',
-            'params' => [
-                'backend' => new Backend\ElasticSearch(new \Elasticsearch\Client()),
-            ],
+            'listener' => new EventListener\MetadataOperations([
+                'backend' => new Backend\ElasticSearch(new \Elasticsearch\Client())
+            ])
         ],
     ],
 ];
