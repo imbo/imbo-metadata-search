@@ -6,7 +6,7 @@ use Imbo\MetadataSearch\Interfaces\DslAstComparisonInterface AS AstComparison;
 
 /**
  * An abstract base-comparison that just stores a value. The point of the
- * comparisons is simly to have different concrete class-names to match against
+ * comparisons is simply to have different concrete class-names to match against
  * - not to store the value differenty.
  */
 abstract class Base implements AstComparison {
