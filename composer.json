@@ -7,6 +7,10 @@
         {
             "name": "Kristoffer Brabrand",
             "email": "kristoffer@brabrand.no"
+        },
+        {
+            "name": "Morten Fangel",
+            "email": "fangel@sevengoslings.net"
         }
     ],
     "support": {
@@ -15,6 +19,9 @@
     },
     "require": {
         "php": ">=5.4.0"
+    },
+    "require-dev": {
+      "phpunit/phpunit": "~4.3"
     },
     "suggest": {
         "elasticsearch/elasticsearch": "Enables usage of elasticsearch as search backend. Recommended version: >=1.3.0"
