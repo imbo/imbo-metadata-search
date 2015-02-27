@@ -14,5 +14,5 @@ interface DslTransformationInterface {
      * @param Imbo\MetadataSearch\Interfaces\DslAstInterface query
      * @return mixed
      */
-    public static function transform(AstNode $query);
+    public function transform(AstNode $query);
 }

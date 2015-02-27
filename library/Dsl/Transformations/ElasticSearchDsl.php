@@ -24,8 +24,8 @@ class ElasticSearchDsl implements DslTransformationInterface {
      * @param Imbo\MetadataSearch\Interfaces\DslAstInterface $query
      * @return array
      */
-    public static function transform(AstNode $query) {
-        $transformed = self::_transform($query);
+    public function transform(AstNode $query) {
+        $transformed = $this->_transform($query);
         if (key($transformed) !== 'query') {
             // If the outer-most comparison wasn't `query`, it means it was an
             // and or an or, which can only be used in filters, so we ensure
@@ -40,14 +40,14 @@ class ElasticSearchDsl implements DslTransformationInterface {
      * @param Imbo\MetadataSearch\Interfaces\DslAstInterface $query
      * @return array
      */
-    public static function _transform(AstNode $query) {
+    public function _transform(AstNode $query) {
         switch(true) {
             case $query instanceof Conjunction:
                 // We map conjunctions into `and`-filters.
-                return array('and' => array_map(['self', '_transform'], $query->getArrayCopy()));
+                return array('and' => array_map([$this, '_transform'], $query->getArrayCopy()));
             case $query instanceof Disjunction:
                 // ... and disjunctions into `or`-filters
-                return array('or' => array_map(['self', '_transform'], $query->getArrayCopy()));
+                return array('or' => array_map([$this, '_transform'], $query->getArrayCopy()));
             case $query instanceof Field:
                 // We have a field, so let's look at the type of comparison we
                 // are making, to determine how to transform it into a ES-php

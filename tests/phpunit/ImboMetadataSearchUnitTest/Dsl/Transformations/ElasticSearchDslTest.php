@@ -6,6 +6,12 @@ use Imbo\MetadataSearch\Dsl\Parser
   , Imbo\MetadataSearch\Dsl\Transformations\ElasticSearchDsl;
 
 class ElasticSearchDslTest extends \PHPUnit_Framework_TestCase {
+    private $transformation;
+
+    public function setUp() {
+        $this->transformation = new ElasticSearchDsl();
+    }
+
     public function getQueries() {
         return array(
             'a simple query' => array(
@@ -30,6 +36,6 @@ class ElasticSearchDslTest extends \PHPUnit_Framework_TestCase {
      * @dataProvider getQueries
      */
     public function testTransformationsUsingAQuery($query, $expected) {
-        $this->assertEquals($expected, ElasticSearchDsl::transform(Parser::parse($query)));
+        $this->assertEquals($expected, $this->transformation->transform(Parser::parse($query)));
     }
 }
