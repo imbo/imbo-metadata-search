@@ -66,6 +66,8 @@ class MetadataOperations implements ListenerInterface {
      * @param Imbo\EventListener\ListenerInterface $event The current event
      */
     public function delete(EventInterface $event) {
+        $request = $event->getRequest();
+
         $this->backend->delete($request->getPublicKey(), $request->getImageIdentifier());
     }
 }
