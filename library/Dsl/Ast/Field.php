@@ -1,8 +1,8 @@
 <?php
 namespace Imbo\MetadataSearch\Dsl\Ast;
 
-use Imbo\MetadataSearch\Interfaces\DslAstInterface as AstNode
-  , Imbo\MetadataSearch\Interfaces\DslAstComparisonInterface as AstComparison;
+use Imbo\MetadataSearch\Interfaces\DslAstInterface as AstNode,
+    Imbo\MetadataSearch\Interfaces\DslAstComparisonInterface as AstComparison;
 
 /**
  * A criteria on a fields value. Represents the name of the field and a
@@ -21,6 +21,7 @@ class Field implements AstNode {
 
     /**
      * Construct a new Field criteria.
+     *
      * @param string $field Name of the field for the criteria
      * @param Imbo\MetadataSearch\Interfaces\DslAstComparisonInterface $comparison
      * @return Imbo\MetadataSearch\Dsl\Ast\Field
@@ -32,6 +33,7 @@ class Field implements AstNode {
 
     /**
      * Get the name of the field used in this comparison
+     *
      * @return string
      */
     public function field() {
@@ -40,6 +42,7 @@ class Field implements AstNode {
 
     /**
      * Get the comparison that this field criteria is using
+     *
      * @return Imbo\MetadataSearch\Interfaces\DslAstComparisonInterface
      */
     public function comparison() {

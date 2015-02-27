@@ -2,18 +2,18 @@
 
 namespace ImboMetadataSearchUnitTest\Dsl;
 
-use Imbo\MetadataSearch\Dsl\Parser
-  , Imbo\MetadataSearch\Dsl\Ast\Conjunction
-  , Imbo\MetadataSearch\Dsl\Ast\Disjunction
-  , Imbo\MetadataSearch\Dsl\Ast\Field
-  , Imbo\MetadataSearch\Dsl\Ast\Comparison\Equals
-  , Imbo\MetadataSearch\Dsl\Ast\Comparison\NotEquals
-  , Imbo\MetadataSearch\Dsl\Ast\Comparison\In
-  , Imbo\MetadataSearch\Dsl\Ast\Comparison\NotIn
-  , Imbo\MetadataSearch\Dsl\Ast\Comparison\LessThan
-  , Imbo\MetadataSearch\Dsl\Ast\Comparison\LessThanEquals
-  , Imbo\MetadataSearch\Dsl\Ast\Comparison\GreaterThan
-  , Imbo\MetadataSearch\Dsl\Ast\Comparison\GreaterThanEquals;
+use Imbo\MetadataSearch\Dsl\Parser,
+    Imbo\MetadataSearch\Dsl\Ast\Conjunction,
+    Imbo\MetadataSearch\Dsl\Ast\Disjunction,
+    Imbo\MetadataSearch\Dsl\Ast\Field,
+    Imbo\MetadataSearch\Dsl\Ast\Comparison\Equals,
+    Imbo\MetadataSearch\Dsl\Ast\Comparison\NotEquals,
+    Imbo\MetadataSearch\Dsl\Ast\Comparison\In,
+    Imbo\MetadataSearch\Dsl\Ast\Comparison\NotIn,
+    Imbo\MetadataSearch\Dsl\Ast\Comparison\LessThan,
+    Imbo\MetadataSearch\Dsl\Ast\Comparison\LessThanEquals,
+    Imbo\MetadataSearch\Dsl\Ast\Comparison\GreaterThan,
+    Imbo\MetadataSearch\Dsl\Ast\Comparison\GreaterThanEquals;
 
 
 class ParserTest extends \PHPUnit_Framework_TestCase {

@@ -1,17 +1,17 @@
 <?php
 namespace Imbo\MetadataSearch\Dsl;
 
-use Imbo\MetadataSearch\Dsl\Ast\Conjunction
-  , Imbo\MetadataSearch\Dsl\Ast\Disjunction
-  , Imbo\MetadataSearch\Dsl\Ast\Field
-  , Imbo\MetadataSearch\Dsl\Ast\Comparison\Equals
-  , Imbo\MetadataSearch\Dsl\Ast\Comparison\NotEquals
-  , Imbo\MetadataSearch\Dsl\Ast\Comparison\In
-  , Imbo\MetadataSearch\Dsl\Ast\Comparison\NotIn
-  , Imbo\MetadataSearch\Dsl\Ast\Comparison\LessThan
-  , Imbo\MetadataSearch\Dsl\Ast\Comparison\LessThanEquals
-  , Imbo\MetadataSearch\Dsl\Ast\Comparison\GreaterThan
-  , Imbo\MetadataSearch\Dsl\Ast\Comparison\GreaterThanEquals;
+use Imbo\MetadataSearch\Dsl\Ast\Conjunction,
+    Imbo\MetadataSearch\Dsl\Ast\Disjunction,
+    Imbo\MetadataSearch\Dsl\Ast\Field,
+    Imbo\MetadataSearch\Dsl\Ast\Comparison\Equals,
+    Imbo\MetadataSearch\Dsl\Ast\Comparison\NotEquals,
+    Imbo\MetadataSearch\Dsl\Ast\Comparison\In,
+    Imbo\MetadataSearch\Dsl\Ast\Comparison\NotIn,
+    Imbo\MetadataSearch\Dsl\Ast\Comparison\LessThan,
+    Imbo\MetadataSearch\Dsl\Ast\Comparison\LessThanEquals,
+    Imbo\MetadataSearch\Dsl\Ast\Comparison\GreaterThan,
+    Imbo\MetadataSearch\Dsl\Ast\Comparison\GreaterThanEquals;
 
 class Parser {
     /**
@@ -106,6 +106,7 @@ class Parser {
      * expressions have exactly one term in them.
      * Will throw exceptions if the expression wasn't actually a Mongo-subset
      * query
+     *
      * @param array $ast A Mongo-subset query
      * @return array Normalized Mongo-subset query.
      * @throws \InvalidArgumentException
@@ -159,8 +160,10 @@ class Parser {
      * ensuring that there is only one operation per field. If there is more,
      * they are transformed into $and-expressions of multiple smaller field-
      * operataions.
+     *
      * Will throw an exception if the field-operation wasn't actually part of
      * the Mongo-subset language.
+     *
      * @throws \InvalidArgumentException
      * @param string $field
      * @param mixed $value
@@ -229,6 +232,7 @@ class Parser {
 
     /**
      * Convert a normalized Mongo-subset query into an instance of our DSL AST
+     *
      * @param array $query
      * @return Imbo\MetadataSearch\Interfaces\DslAstInterface
      */
@@ -248,6 +252,7 @@ class Parser {
 
     /**
      * Converts a field-value into an instance of our DSL AST comparison
+     *
      * @param mixed $value
      * @return Imbo\MetadataSearch\Interfaces\DslAstComparisonInterface
      */

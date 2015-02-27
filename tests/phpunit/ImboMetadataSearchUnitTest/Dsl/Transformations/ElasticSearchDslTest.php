@@ -2,8 +2,8 @@
 
 namespace ImboMetadataSearchUnitTest\Dsl\Transformations;
 
-use Imbo\MetadataSearch\Dsl\Parser
-  , Imbo\MetadataSearch\Dsl\Transformations\ElasticSearchDsl;
+use Imbo\MetadataSearch\Dsl\Parser,
+    Imbo\MetadataSearch\Dsl\Transformations\ElasticSearchDsl;
 
 class ElasticSearchDslTest extends \PHPUnit_Framework_TestCase {
     private $transformation;

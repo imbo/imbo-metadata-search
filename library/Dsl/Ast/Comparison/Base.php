@@ -17,6 +17,7 @@ abstract class Base implements AstComparison {
 
     /**
      * Construct a new comparison with a stored value inside it
+     *
      * @param mixed $value The value to store with this comparison
      */
     public function __construct($value) {
@@ -25,6 +26,7 @@ abstract class Base implements AstComparison {
 
     /**
      * Get the value stored for this comparison
+     *
      * @return mixed
      */
     public function value() {
