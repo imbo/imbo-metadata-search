@@ -3,6 +3,7 @@
 namespace Imbo\MetadataSearch\Backend;
 
 use Imbo\MetadataSearch\Interfaces\SearchBackendInterface;
+use Imbo\MetadataSearch\Interfaces\DslAstInterface;
 use Elasticsearch\Client as ElasticsearchClient;
 
 class ElasticSearch implements SearchBackendInterface {
@@ -43,6 +44,13 @@ class ElasticSearch implements SearchBackendInterface {
 
             return false;
         }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function search($publicKey, DslAstInterface $ast, array $queryParams) {
+
     }
 
     /**
