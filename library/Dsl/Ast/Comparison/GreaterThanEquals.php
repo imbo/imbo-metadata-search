@@ -1,8 +1,10 @@
 <?php
 namespace Imbo\MetadataSearch\Dsl\Ast\Comparison;
 
-use Imbo\MetadataSearch\Interfaces\DslAstComparisonInterface AS Ast_Comparison
+use Imbo\MetadataSearch\Interfaces\DslAstComparisonInterface AS AstComparison
   , Imbo\MetadataSearch\Dsl\Ast\Comparison\Base;
 
-
-class GreaterThanEquals extends Base implements Ast_Comparison {}
+/**
+ * A comparison for greater-than-or-equals against the stored value
+ */
+class GreaterThanEquals extends Base implements AstComparison {}

@@ -37,7 +37,7 @@ class Parser {
         '$lte'      => true,
         '$ne'       => true,
         '$nin'      => true,
-        '$wildcard' => true,
+        '$wildcard' => false, // We want to support this - but not built yet
     );
 
     /**
