@@ -21,6 +21,7 @@
         "php": ">=5.4.0"
     },
     "require-dev": {
+      "ext-imagick": ">=3.0.1",
       "phpunit/phpunit": "~4.3",
       "imbo/imbo": "~1.2.3",
       "behat/behat": "~3.0"
