@@ -87,15 +87,22 @@ class MetadataOperations implements ListenerInterface {
      * @param string[] Array with image identifiers
      */
     public function search(EventInterface $event) {
+        $request = $event->getRequest();
+        $params = $request->query;
+
+        // Extract query
+        $metadataQuery = $params->get('q');;
+
+        // If no metadata is provided, we'll let db.images.load take over
+        if (!$metadataQuery) {
+            $event->getManager()->trigger('db.images.load');
+            return;
+        }
+
+        // Check access token
         $event->getManager()->trigger('checkAccessToken');
 
-        $request = $event->getRequest();
-
-        $params = $request->query;
-        $query = $request->getContent();
-
-        $publicKey = $request->getPublicKey();
-
+        // Build query params array
         $queryParams = [
             'page' => $params->get('page', 1),
             'limit' => $params->get('limit', 20),
@@ -104,12 +111,24 @@ class MetadataOperations implements ListenerInterface {
         ];
 
         // Parse the query JSON and transform it to an AST
-        $ast = DslParser::parse($query);
+        $ast = DslParser::parse($metadataQuery);
 
         // Query backend using the AST
-        $imageIdentifiers = $this->backend->search($publicKey, $ast, $queryParams);
+        $backendResponse = $this->backend->search(
+            $request->getPublicKey(),
+            $ast,
+            $queryParams
+        );
 
-        // Modify the request parameters on the event here to include an explicit
-        // list of ids to fetch from the database backend using db.images.load
+        // Modify the request params before triggering images load
+        $params->set('ids', $backendResponse->getImageIdentifiers());
+        $params->set('page', 0);
+
+        $event->getManager()->trigger('db.images.load');
+        $responseModel = $event->getResponse()->getModel();
+
+        // Set the actual page used for querying search backend on the response
+        $responseModel->setPage($queryParams['page']);
+        $responseModel->setHits($backendResponse->getHits());
     }
 }
