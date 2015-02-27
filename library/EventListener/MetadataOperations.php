@@ -26,10 +26,12 @@ class MetadataOperations implements ListenerInterface {
     }
 
     public static function getSubscribedEvents() {
+        // Return event subscriptions and make sure
+        // they fire after anything else
         return [
-            'metadata.post' => 'post',
-            'metadata.put' => 'put',
-            'metadata.delete' => 'delete'
+            'metadata.post'   => ['post' => -1000],
+            'metadata.put'    => ['put' => -1000],
+            'metadata.delete' => ['delete' => -1000],
         ];
     }
 
@@ -48,7 +50,14 @@ class MetadataOperations implements ListenerInterface {
      * @param Imbo\EventListener\ListenerInterface $event The current event
      */
     public function put(EventInterface $event) {
-        // Put operation
+        $request = $event->getRequest();
+        $metadata = json_decode($request->getContent(), true);
+
+        $this->backend->set(
+            $request->getPublicKey(),
+            $request->getImageIdentifier(),
+            $metadata
+        );
     }
 
     /**
@@ -57,6 +66,6 @@ class MetadataOperations implements ListenerInterface {
      * @param Imbo\EventListener\ListenerInterface $event The current event
      */
     public function delete(EventInterface $event) {
-        // Delete operation
+        $this->backend->delete($request->getPublicKey(), $request->getImageIdentifier());
     }
 }
