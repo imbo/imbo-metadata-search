@@ -1,4 +1,5 @@
 <?php
+
 namespace Imbo\MetadataSearch\Dsl\Transformations;
 
 use Imbo\MetadataSearch\Interfaces\DslTransformationInterface,

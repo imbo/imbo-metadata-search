@@ -1,4 +1,5 @@
 <?php
+
 namespace Imbo\MetadataSearch\Dsl;
 
 use Imbo\MetadataSearch\Dsl\Ast\Conjunction,

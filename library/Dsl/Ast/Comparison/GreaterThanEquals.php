@@ -1,4 +1,5 @@
 <?php
+
 namespace Imbo\MetadataSearch\Dsl\Ast\Comparison;
 
 use Imbo\MetadataSearch\Interfaces\DslAstComparisonInterface AS AstComparison,

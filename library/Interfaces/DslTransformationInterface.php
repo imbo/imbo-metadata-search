@@ -1,4 +1,5 @@
 <?php
+
 namespace Imbo\MetadataSearch\Interfaces;
 
 use Imbo\MetadataSearch\Interfaces\DslAstInterface AS AstNode;
