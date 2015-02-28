@@ -1,3 +1,4 @@
 composer.phar
-vendor/
+/vendor/
 config/config.php
+/build/
