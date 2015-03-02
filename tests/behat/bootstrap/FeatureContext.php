@@ -6,11 +6,28 @@ use Behat\Behat\Tester\Exception\PendingException;
 use Behat\Gherkin\Node\PyStringNode;
 use Behat\Gherkin\Node\TableNode;
 
+use Imbo\Application as Imbo;
+
 /**
  * Defines application features from the specific context.
  */
 class FeatureContext implements Context, SnippetAcceptingContext
 {
+    /**
+     * @var Imbo\Application
+     */
+    public $imbo;
+
+    /**
+     * @var array
+     */
+    protected $imboConfig = null;
+
+    /**
+     * @var bool
+     */
+    protected $imboConfigLoaded = false;
+
     /**
      * Initializes context.
      *
@@ -20,13 +37,38 @@ class FeatureContext implements Context, SnippetAcceptingContext
      */
     public function __construct()
     {
+        $this->imbo = new Imbo();
     }
 
     /**
-     * @Given Imbo uses the :arg1 configuration
+     * Load the configuration and "run" the application
      */
-    public function imboUsesTheConfiguration($arg1)
+    protected function loadConfig($config)
     {
+        $this->imbo->run($this->imboConfig);
+    }
+
+    /**
+     * @Given Imbo uses the :config configuration
+     */
+    public function imboUsesTheConfiguration($config)
+    {
+        $this->imboConfig = $config;
+    }
+
+    /**
+     * @When I request :arg1 using HTTP :arg2
+     */
+    public function iRequestUsingHttp($arg1, $arg2)
+    {
+        if (!$this->imboConfigLoaded && $this->imboConfig) {
+            $this->loadConfig($this->imboConfig);
+        }
+
+        if (!$this->imboConfigLoaded && !$this->imboConfig) {
+            throw new \Exception('No imbo configuration set');
+        }
+
         throw new PendingException();
     }
 
@@ -55,17 +97,9 @@ class FeatureContext implements Context, SnippetAcceptingContext
     }
 
     /**
-     * @Given the request body contains {:arg1::arg2}
+     * @Given the request body contains:
      */
-    public function theRequestBodyContains($arg1, $arg2)
-    {
-        throw new PendingException();
-    }
-
-    /**
-     * @When I request :arg1 using HTTP :arg2
-     */
-    public function iRequestUsingHttp($arg1, $arg2)
+    public function theRequestBodyContains(PyStringNode $string)
     {
         throw new PendingException();
     }
@@ -79,9 +113,9 @@ class FeatureContext implements Context, SnippetAcceptingContext
     }
 
     /**
-     * @Then Elasticsearch should have {:arg1::arg2} for 574e32fb252f3c157c9b31babb0868c2
+     * @Then Elasticsearch should have the following metadata for :arg1:
      */
-    public function elasticsearchShouldHaveForEfbfccbbabbc($arg1, $arg2)
+    public function elasticsearchShouldHaveTheFollowingMetadataFor($arg1, PyStringNode $string)
     {
         throw new PendingException();
     }
@@ -95,9 +129,9 @@ class FeatureContext implements Context, SnippetAcceptingContext
     }
 
     /**
-     * @Then Elasticsearch should have {:arg1::arg2, :arg3::arg4} for 3012ee0319a7f752ac615d8d86b63894
+     * @Given I include this metadata in the query:
      */
-    public function elasticsearchShouldHaveForEeafacddb($arg1, $arg2, $arg3, $arg4)
+    public function iIncludeThisMetadataInTheQuery(PyStringNode $string)
     {
         throw new PendingException();
     }
@@ -111,65 +145,33 @@ class FeatureContext implements Context, SnippetAcceptingContext
     }
 
     /**
-     * @Given I include a metadata search for {:arg1::arg2} in the query
+     * @Then I should get the following images response list:
      */
-    public function iIncludeAMetadataSearchForInTheQuery($arg1, $arg2)
+    public function iShouldGetTheFollowingImagesResponseList(PyStringNode $string)
     {
         throw new PendingException();
     }
 
     /**
-     * @When I request :arg1
+     * @Then the hit count should be :arg1
      */
-    public function iRequest($arg1)
+    public function theHitCountShouldBe($arg1)
     {
         throw new PendingException();
     }
 
     /**
-     * @Then I should get  in the images response list
+     * @Given I limit the number of items per page to :arg1
      */
-    public function iShouldGetInTheImagesResponseList()
+    public function iLimitTheNumberOfItemsPerPageTo($arg1)
     {
         throw new PendingException();
     }
 
     /**
-     * @Then I should get ce3e8c3de4b67e8af5315be82ec36692 in the images response list
+     * @Given I request page number :arg1
      */
-    public function iShouldGetCeecdebeafbeecInTheImagesResponseList()
-    {
-        throw new PendingException();
-    }
-
-    /**
-     * @Then I should get 574e32fb252f3c157c9b31babb0868c2,d3712bb23cf4e191e65cf938d55e8982 in the images response list
-     */
-    public function iShouldGetEfbfccbbabbcDbbcfeecfdeInTheImagesResponseList()
-    {
-        throw new PendingException();
-    }
-
-    /**
-     * @Then I should get 574e32fb252f3c157c9b31babb0868c2 in the images response list
-     */
-    public function iShouldGetEfbfccbbabbcInTheImagesResponseList()
-    {
-        throw new PendingException();
-    }
-
-    /**
-     * @Then I should get d3712bb23cf4e191e65cf938d55e8982 in the images response list
-     */
-    public function iShouldGetDbbcfeecfdeInTheImagesResponseList()
-    {
-        throw new PendingException();
-    }
-
-    /**
-     * @Given I include a metadata search for {:arg1::arg2,:arg3::arg4} in the query
-     */
-    public function iIncludeAMetadataSearchForInTheQuery2($arg1, $arg2, $arg3, $arg4)
+    public function iRequestPageNumber($arg1)
     {
         throw new PendingException();
     }
