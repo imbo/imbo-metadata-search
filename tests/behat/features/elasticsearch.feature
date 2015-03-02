@@ -13,17 +13,19 @@ Feature: Use elasticsearch as search backend for the metadata search pluin
             | tests/fixtures/kitten.jpg        | {"animal":"Cat", "color":"red"}       |
             | tests/fixtures/prairie-dog.jpg   | {"animal":"Dog"}                      |
 
-    Scenario Outline: Updating metadata
+    Scenario: Updating metadata
         Given I use "publickey" and "privatekey" for public and private keys
         And I sign the request
-        And the request body contains <metadata>
-        When I request "/users/publickey/images/<imageIdentifer>/metadata" using HTTP "PUT"
+        And the request body contains:
+        """
+        {"foo": "bar"}
+        """
+        When I request "/users/publickey/images/574e32fb252f3c157c9b31babb0868c2/metadata" using HTTP "PUT"
         Then I should get a response with "200 OK"
-        And Elasticsearch should have <metadata> for <imageIdentifer>
-
-        Examples:
-            | imageIdentifer                   | metadata      |
-            | 574e32fb252f3c157c9b31babb0868c2 | {"foo":"bar"} |
+        And Elasticsearch should have the following metadata for "574e32fb252f3c157c9b31babb0868c2":
+        """
+        {"foo": "bar"}
+        """
 
     Scenario: Deleting metadata
         Given I use "publickey" and "privatekey" for public and private keys
@@ -32,31 +34,87 @@ Feature: Use elasticsearch as search backend for the metadata search pluin
         Then I should get a response with "200 OK"
         And Elasticsearch should not have metadata for "574e32fb252f3c157c9b31babb0868c2"
 
-    Scenario Outline: Patch metadata
+    Scenario: Patch metadata
         Given I use "publickey" and "privatekey" for public and private keys
         And I sign the request
-        And the request body contains <patchData>
-        When I request "/users/publickey/images/<imageIdentifer>/metadata" using HTTP "POST"
+        And the request body contains:
+        """
+        {"foo": "bar"}
+        """
+        When I request "/users/publickey/images/3012ee0319a7f752ac615d8d86b63894/metadata" using HTTP "POST"
         Then I should get a response with "200 OK"
-        And Elasticsearch should have <metadata> for <imageIdentifer>
+        And Elasticsearch should have the following metadata for "3012ee0319a7f752ac615d8d86b63894":
+        """
+        {"animal": "Giant Panda", "foo": "bar"}
+        """
 
-        Examples:
-            | imageIdentifer                   | patchData      | metadata                              |
-            | 3012ee0319a7f752ac615d8d86b63894 | {"foo":"bar"}  | {"animal":"Giant Panda", "foo":"bar"} |
+    Scenario: Request the search endpoint without accessToken
+        Given I include this metadata in the query:
+        """
+        {"foo":"bar"}
+        """
+        When I request "user/publickey/search.json" using HTTP "GET"
+        Then I should get a response with "400 Missing access token"
 
-    Scenario Outline: Search for images with metadata query
+    Scenario: Search for something that doesn't exist
         Given I use "publickey" and "privatekey" for public and private keys
         And I include an access token in the query
-        And I include a metadata search for <metadata> in the query
-        When I request "/users/publickey/search.json"
+        And I include this metadata in the query:
+        """
+        {"animal": "Snake"}
+        """
+        When I request "/users/publickey/search.json" using HTTP "GET"
         Then I should get a response with "200 OK"
-        And I should get <imageIdentifers> in the images response list
+        And I should get the following images response list:
+        """
+        """
+        And the hit count should be "0"
 
-        Examples:
-            | metadata                       | page | limit | imageIdentifers                                                   | hits |
-            | {"animal":"Snake"}             | 1    | 20    |                                                                   | 0    |
-            | {"animal":"Hedgehog"}          | 1    | 20    | ce3e8c3de4b67e8af5315be82ec36692                                  | 1    |
-            | {"color":"red"}                | 1    | 20    | 574e32fb252f3c157c9b31babb0868c2,d3712bb23cf4e191e65cf938d55e8982 | 2    |
-            | {"color":"red"}                | 1    | 1     | 574e32fb252f3c157c9b31babb0868c2                                  | 2    |
-            | {"color":"red"}                | 2    | 1     | d3712bb23cf4e191e65cf938d55e8982                                  | 2    |
-            | {"animal":"Cat","color":"red"} | 1    | 20    | d3712bb23cf4e191e65cf938d55e8982                                  | 1    |
+    Scenario: Search for something that does exist
+        Given I use "publickey" and "privatekey" for public and private keys
+        And I include an access token in the query
+        And I include this metadata in the query:
+        """
+        {"color":"red"}
+        """
+        When I request "/users/publickey/search.json" using HTTP "GET"
+        Then I should get a response with "200 OK"
+        And I should get the following images response list:
+        """
+        574e32fb252f3c157c9b31babb0868c2
+        d3712bb23cf4e191e65cf938d55e8982
+        """
+        And the hit count should be "2"
+
+    Scenario: Limit the of hits per page and return only first page
+        Given I use "publickey" and "privatekey" for public and private keys
+        And I include an access token in the query
+        And I limit the number of items per page to "1"
+        And I include this metadata in the query:
+        """
+        {"color":"red"}
+        """
+        When I request "/users/publickey/search.json" using HTTP "GET"
+        Then I should get a response with "200 OK"
+        And I should get the following images response list:
+        """
+        574e32fb252f3c157c9b31babb0868c2
+        """
+        And the hit count should be "2"
+
+    Scenario: Limit the of hits per page and return only first page
+        Given I use "publickey" and "privatekey" for public and private keys
+        And I include an access token in the query
+        And I limit the number of items per page to "1"
+        And I request page number "2"
+        And I include this metadata in the query:
+        """
+        {"color":"red"}
+        """
+        When I request "/users/publickey/search.json" using HTTP "GET"
+        Then I should get a response with "200 OK"
+        And I should get the following images response list:
+        """
+        d3712bb23cf4e191e65cf938d55e8982
+        """
+        And the hit count should be "2"
