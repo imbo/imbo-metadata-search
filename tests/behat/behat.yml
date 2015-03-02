@@ -1,3 +1,5 @@
+
+
 default:
   autoload:
     '': %paths.base%/bootstrap
@@ -5,3 +7,14 @@ default:
     default:
       paths:
         - %paths.base%/features
+
+      parameters:
+        # URL to use for the functional tests with the built in httpd in php-5.4
+        url: "http://localhost:8888"
+
+        # Document root and router used by the httpd
+        documentRoot: vendor/imbo/imbo/public
+        router: %paths.base%/vendor/imbo/imbo/library/Imbo/router.php
+
+        # Timeout when trying to connect to the built in httpd
+        timeout: 5

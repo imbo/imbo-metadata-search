@@ -11,7 +11,7 @@ use Imbo\Application as Imbo;
 /**
  * Defines application features from the specific context.
  */
-class FeatureContext implements Context, SnippetAcceptingContext
+class FeatureContext extends RESTContext implements Context, SnippetAcceptingContext
 {
     /**
      * @var Imbo\Application
