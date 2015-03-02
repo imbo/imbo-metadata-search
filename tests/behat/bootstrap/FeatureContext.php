@@ -46,6 +46,8 @@ class FeatureContext implements Context, SnippetAcceptingContext
     protected function loadConfig($config)
     {
         $this->imbo->run($this->imboConfig);
+
+        $this->imboConfigLoaded = true;
     }
 
     /**
@@ -53,6 +55,10 @@ class FeatureContext implements Context, SnippetAcceptingContext
      */
     public function imboUsesTheConfiguration($config)
     {
+        if ($this->imboConfigLoaded) {
+            throw new \Exception('Cannot change Imbo config after loading');
+        }
+
         $this->imboConfig = $config;
     }
 
@@ -72,7 +78,7 @@ class FeatureContext implements Context, SnippetAcceptingContext
         throw new PendingException();
     }
 
-    /**
+     /**
      * @Given The following images exist in Imbo:
      */
     public function theFollowingImagesExistInImbo(TableNode $table)
@@ -145,9 +151,25 @@ class FeatureContext implements Context, SnippetAcceptingContext
     }
 
     /**
-     * @Then I should get the following images response list:
+     * @Given /^I include (\{.*\}) in the query$/
      */
-    public function iShouldGetTheFollowingImagesResponseList(PyStringNode $string)
+    public function iIncludeInTheQuery($arg1)
+    {
+        throw new PendingException();
+    }
+
+    /**
+     * @Given I set the :arg1 query param to :arg2
+     */
+    public function iSetTheQueryParamTo($arg1, $arg2)
+    {
+        throw new PendingException();
+    }
+
+    /**
+     * @Then /^I should get the (.*) in the image response list$/
+     */
+    public function iShouldGetTheInTheImageResponseList($arg1)
     {
         throw new PendingException();
     }
@@ -156,22 +178,6 @@ class FeatureContext implements Context, SnippetAcceptingContext
      * @Then the hit count should be :arg1
      */
     public function theHitCountShouldBe($arg1)
-    {
-        throw new PendingException();
-    }
-
-    /**
-     * @Given I limit the number of items per page to :arg1
-     */
-    public function iLimitTheNumberOfItemsPerPageTo($arg1)
-    {
-        throw new PendingException();
-    }
-
-    /**
-     * @Given I request page number :arg1
-     */
-    public function iRequestPageNumber($arg1)
     {
         throw new PendingException();
     }

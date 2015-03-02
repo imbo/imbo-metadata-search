@@ -56,65 +56,22 @@ Feature: Use elasticsearch as search backend for the metadata search pluin
         When I request "user/publickey/search.json" using HTTP "GET"
         Then I should get a response with "400 Missing access token"
 
-    Scenario: Search for something that doesn't exist
+    Scenario Outline: Search using metadata queries
         Given I use "publickey" and "privatekey" for public and private keys
         And I include an access token in the query
-        And I include this metadata in the query:
-        """
-        {"animal": "Snake"}
-        """
+        And I include <metadata> in the query
+        And I set the "limit" query param to "<limit>"
+        And I set the "page" query param to "<page>"
         When I request "/users/publickey/search.json" using HTTP "GET"
         Then I should get a response with "200 OK"
-        And I should get the following images response list:
-        """
-        """
-        And the hit count should be "0"
+        And I should get the "<imageIdentifers>" in the image response list
+        And the hit count should be "<hits>"
 
-    Scenario: Search for something that does exist
-        Given I use "publickey" and "privatekey" for public and private keys
-        And I include an access token in the query
-        And I include this metadata in the query:
-        """
-        {"color":"red"}
-        """
-        When I request "/users/publickey/search.json" using HTTP "GET"
-        Then I should get a response with "200 OK"
-        And I should get the following images response list:
-        """
-        574e32fb252f3c157c9b31babb0868c2
-        d3712bb23cf4e191e65cf938d55e8982
-        """
-        And the hit count should be "2"
-
-    Scenario: Limit the of hits per page and return only first page
-        Given I use "publickey" and "privatekey" for public and private keys
-        And I include an access token in the query
-        And I limit the number of items per page to "1"
-        And I include this metadata in the query:
-        """
-        {"color":"red"}
-        """
-        When I request "/users/publickey/search.json" using HTTP "GET"
-        Then I should get a response with "200 OK"
-        And I should get the following images response list:
-        """
-        574e32fb252f3c157c9b31babb0868c2
-        """
-        And the hit count should be "2"
-
-    Scenario: Limit the of hits per page and return only first page
-        Given I use "publickey" and "privatekey" for public and private keys
-        And I include an access token in the query
-        And I limit the number of items per page to "1"
-        And I request page number "2"
-        And I include this metadata in the query:
-        """
-        {"color":"red"}
-        """
-        When I request "/users/publickey/search.json" using HTTP "GET"
-        Then I should get a response with "200 OK"
-        And I should get the following images response list:
-        """
-        d3712bb23cf4e191e65cf938d55e8982
-        """
-        And the hit count should be "2"
+        Examples:
+        | metadata                       | page | limit | imageIdentifers                                                   | hits |
+        | {"animal":"Snake"}             | 1    | 20    |                                                                   | 0    |
+        | {"animal":"Hedgehog"}          | 1    | 20    | ce3e8c3de4b67e8af5315be82ec36692                                  | 1    |
+        | {"color":"red"}                | 1    | 20    | 574e32fb252f3c157c9b31babb0868c2,d3712bb23cf4e191e65cf938d55e8982 | 2    |
+        | {"color":"red"}                | 1    | 1     | 574e32fb252f3c157c9b31babb0868c2                                  | 2    |
+        | {"color":"red"}                | 2    | 1     | d3712bb23cf4e191e65cf938d55e8982                                  | 2    |
+        | {"animal":"Cat","color":"red"} | 1    | 20    | d3712bb23cf4e191e65cf938d55e8982                                  | 1    |
