@@ -2,11 +2,11 @@
 
 namespace Imbo\MetadataSearch\EventListener;
 
-use Imbo\EventListener\ListenerInterface;
-use Imbo\EventManager\EventInterface;
-use Imbo\Exception\InvalidArgumentException;
-use Imbo\MetadataSearch\Interfaces\SearchBackendInterface;
-use Imbo\MetadataSearch\Dsl\Parser as DslParser;
+use Imbo\EventListener\ListenerInterface,
+    Imbo\EventManager\EventInterface,
+    Imbo\Exception\InvalidArgumentException,
+    Imbo\MetadataSearch\Interfaces\SearchBackendInterface,
+    Imbo\MetadataSearch\Dsl\Parser as DslParser;
 
 /**
  * Metadata event listener

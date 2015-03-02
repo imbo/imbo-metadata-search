@@ -60,13 +60,13 @@ class ElasticSearchDsl implements DslTransformationInterface {
                 switch (true) {
                     case $comparison instanceof Equals:
                         // Equality we make into `match`-queries
-                        return array('query' => array('match' => 
+                        return array('query' => array('match' =>
                             array($field => $comparison->value())
                         ));
                     case $comparison instanceof NotEquals:
                         // And not-equals we make into a not-filter with a
                         // `match`-filter inside it
-                        return array('not' => array('query' => array('match' => 
+                        return array('not' => array('query' => array('match' =>
                             array($field => $comparison->value())
                         )));
                     case $comparison instanceof In:

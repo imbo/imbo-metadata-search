@@ -2,10 +2,10 @@
 
 namespace Imbo\MetadataSearch\Backend;
 
-use Imbo\MetadataSearch\Interfaces\SearchBackendInterface;
-use Imbo\MetadataSearch\Interfaces\DslAstInterface;
-use Imbo\MetadataSearch\Model\BackendResponse;
-use Elasticsearch\Client as ElasticsearchClient;
+use Imbo\MetadataSearch\Interfaces\SearchBackendInterface,
+    Imbo\MetadataSearch\Interfaces\DslAstInterface,
+    Imbo\MetadataSearch\Model\BackendResponse,
+    Elasticsearch\Client as ElasticsearchClient;
 
 /**
  * Elasticsearch search backend for metadata search

@@ -2,9 +2,9 @@
 
 namespace Imbo\MetadataSearch\Resource;
 
-use Imbo\EventManager\EventInterface;
-use Imbo\Resource\ResourceInterface;
-use Imbo\Model;
+use Imbo\EventManager\EventInterface,
+    Imbo\Resource\ResourceInterface,
+    Imbo\Model;
 
 class Search implements ResourceInterface {
     /**
