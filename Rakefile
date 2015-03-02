@@ -21,3 +21,12 @@ task :behat do
     exit 1
   end
 end
+
+desc "Run codesniffer"
+task :phpcs do
+  begin
+    sh %{vendor/bin/phpcs --standard=vendor/imbo/imbo-phpcs-standard/Imbo library}
+  rescue Exception
+    exit 1
+  end
+end
