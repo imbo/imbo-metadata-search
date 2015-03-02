@@ -6,75 +6,16 @@ use Behat\Behat\Tester\Exception\PendingException;
 use Behat\Gherkin\Node\PyStringNode;
 use Behat\Gherkin\Node\TableNode;
 
-use Imbo\Application as Imbo;
-
 /**
  * Defines application features from the specific context.
  */
 class FeatureContext extends RESTContext implements Context, SnippetAcceptingContext
 {
     /**
-     * @var Imbo\Application
-     */
-    public $imbo;
-
-    /**
-     * @var array
-     */
-    protected $imboConfig = null;
-
-    /**
-     * @var bool
-     */
-    protected $imboConfigLoaded = false;
-
-    /**
-     * Initializes context.
-     *
-     * Every scenario gets its own context instance.
-     * You can also pass arbitrary arguments to the
-     * context constructor through behat.yml.
-     */
-    public function __construct()
-    {
-        $this->imbo = new Imbo();
-    }
-
-    /**
-     * Load the configuration and "run" the application
-     */
-    protected function loadConfig($config)
-    {
-        $this->imbo->run($this->imboConfig);
-
-        $this->imboConfigLoaded = true;
-    }
-
-    /**
-     * @Given Imbo uses the :config configuration
-     */
-    public function imboUsesTheConfiguration($config)
-    {
-        if ($this->imboConfigLoaded) {
-            throw new \Exception('Cannot change Imbo config after loading');
-        }
-
-        $this->imboConfig = $config;
-    }
-
-    /**
      * @When I request :arg1 using HTTP :arg2
      */
     public function iRequestUsingHttp($arg1, $arg2)
     {
-        if (!$this->imboConfigLoaded && $this->imboConfig) {
-            $this->loadConfig($this->imboConfig);
-        }
-
-        if (!$this->imboConfigLoaded && !$this->imboConfig) {
-            throw new \Exception('No imbo configuration set');
-        }
-
         throw new PendingException();
     }
 
