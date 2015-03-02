@@ -4,8 +4,7 @@ Feature: Use elasticsearch as search backend for the metadata search pluin
     I must enable the MetadataOperations event listener with the ElasticSearch backend
 
     Background:
-        Given Imbo uses the "metadata-search-elasticsearch.php" configuration
-        And The following images exist in Imbo:
+        Given The following images exist in Imbo:
             | file                             | metadata                              |
             | tests/fixtures/red-panda.jpg     | {"animal":"Red Panda", "color":"red"} |
             | tests/fixtures/giant-pada.jpg    | {"animal":"Giant Panda"}              |
