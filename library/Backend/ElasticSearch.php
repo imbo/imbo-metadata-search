@@ -2,9 +2,16 @@
 
 namespace Imbo\MetadataSearch\Backend;
 
-use Imbo\MetadataSearch\Interfaces\SearchBackendInterface;
-use Elasticsearch\Client as ElasticsearchClient;
+use Imbo\MetadataSearch\Interfaces\SearchBackendInterface,
+    Imbo\MetadataSearch\Interfaces\DslAstInterface,
+    Imbo\MetadataSearch\Model\BackendResponse,
+    Elasticsearch\Client as ElasticsearchClient;
 
+/**
+ * Elasticsearch search backend for metadata search
+ *
+ * @author Kristoffer Brabrand <kristoffer@brabrand.net>
+ */
 class ElasticSearch implements SearchBackendInterface {
     /**
      * @var Elasticsearch\Client
@@ -43,6 +50,23 @@ class ElasticSearch implements SearchBackendInterface {
 
             return false;
         }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function search($publicKey, DslAstInterface $ast, array $queryParams) {
+        // Transform $ast to ES query here, query and return imageIdentifers
+
+        $response = new BackendResponse();
+
+        $response->setImageIdentifiers([
+            'a43e8662ed3476e0e22f80c01b0b28d8'
+        ]);
+
+        $response->setHits(1);
+
+        return $response;
     }
 
     /**
