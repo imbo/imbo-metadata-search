@@ -4,7 +4,7 @@ namespace Imbo\MetadataSearch;
 
 $config = [
     'auth' => [
-        'key' => 'foobar'
+        'publickey' => 'privatekey'
     ],
 
     'database' => function() {
@@ -37,13 +37,20 @@ $config = [
         ],
     ],
 
+    'resources' => [
+        'search' => new Resource\Search(),
+    ],
+
+    'routes' => [
+        'search' => '#^/(?<publicKey>[a-z0-9_-]{3,})/search(\.(?<extension>json|xml))?$#',
+    ],
+
     'eventListenerInitializers' => [
         'imagick' => 'Imbo\EventListener\Initializer\Imagick',
     ],
 
     'transformationPresets' => [],
-    'resources' => [],
-    'routes' => [],
+
     'trustedProxies' => [],
 ];
 
