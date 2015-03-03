@@ -21,3 +21,4 @@ before_script:
   - composer -n --no-ansi install --dev --prefer-source
 script:
   - ./vendor/bin/phpunit --verbose -c tests/phpunit/phpunit.xml.travis
+  - ./vendor/bin/behat --strict --config tests/behat/behat.yml
