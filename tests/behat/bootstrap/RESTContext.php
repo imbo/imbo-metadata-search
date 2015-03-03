@@ -2,6 +2,9 @@
 
 use Behat\Behat\Context\Context;
 use Behat\Testwork\Hook\Scope\BeforeSuiteScope;
+use ImboClient\ImboClient;
+use Assert\Assertion;
+use Guzzle\Plugin\History\HistoryPlugin;
 
 /**
  * Defines REST context for behat tests.
@@ -16,13 +19,78 @@ class RESTContext implements Context
     private static $testSessionId;
 
     /**
+     * Imbo client used to make requests against the httpd
+     *
+     * @var ImboClient\ImboClient
+     */
+    protected $imbo;
+
+    /**
+     * The guzzle request and response history
+     *
+     * @var Guzzle\Plugin\History\HistoryPlugin
+     */
+    protected $history;
+
+    /**
+     * Query params used when doing non Imbo client requests
+     *
+     * @var array
+     */
+    protected $queryParams;
+
+    /**
+     * Headers for the request
+     *
+     * @var array
+     */
+    protected $requestHeaders = array();
+
+    /**
+     * Class constructor
+     *
+     * @param array $parameters Context parameters
+     */
+    public function __construct($url, $documentRoot, $timeout) {
+        $this->params = [
+            'url' => $url,
+            'documentRoot' => $documentRoot,
+            'timeout' => $timeout
+        ];
+
+        $this->createClient();
+    }
+
+    /**
+     * Create a new HTTP client
+     */
+    private function createClient() {
+        $this->history = new HistoryPlugin();
+
+        $this->imbo = new ImboClient($this->params['url'], array(
+            'publicKey' => 'publickey',
+            'privateKey' => 'privatekey',
+        ));
+
+        $eventDispatcher = $this->imbo->getEventDispatcher();
+        $eventDispatcher->addSubscriber($this->history);
+
+        $defaultHeaders = array(
+            'X-Test-Session-Id' => self::$testSessionId,
+        );
+
+        $this->imbo->setDefaultHeaders($defaultHeaders);
+    }
+
+    /**
      * Start up the built in httpd in php-5.4
      *
      * @BeforeSuite
      */
     public static function setUp(BeforeSuiteScope $scope) {
-        $scopeSettings = $scope->getSuite()->getSettings();
-        $params = $scopeSettings['parameters'];
+        $contexts = $scope->getSuite()->getSettings()['contexts'];
+
+        $params = $contexts[0]['FeatureContext'];
 
         $url = parse_url($params['url']);
         $port = !empty($url['port']) ? $url['port'] : 80;
@@ -34,8 +102,7 @@ class RESTContext implements Context
         $pid = self::startBuiltInHttpd(
             $url['host'],
             $port,
-            $params['documentRoot'],
-            $params['router']
+            $params['documentRoot']
         );
 
         if (!$pid) {
@@ -77,16 +144,14 @@ class RESTContext implements Context
      * @param string $host The hostname to use
      * @param int $port The port to use
      * @param string $documentRoot The document root
-     * @param string $router Path to an optional router
      * @return int Returns the PID of the httpd
      * @throws RuntimeException
      */
-    private static function startBuiltInHttpd($host, $port, $documentRoot, $router = null) {
-        $command = sprintf('php -S %s:%d -t %s %s >/dev/null 2>&1 & echo $!',
+    private static function startBuiltInHttpd($host, $port, $documentRoot) {
+        $command = sprintf('php -S %s:%d -t %s >/dev/null 2>&1 & echo $!',
                             $host,
                             $port,
-                            $documentRoot,
-                            $router);
+                            $documentRoot);
 
         $output = array();
         exec($command, $output);
@@ -113,5 +178,60 @@ class RESTContext implements Context
         fclose($sp);
 
         return true;
+    }
+
+    /**
+     * @When /^I search for images using (.*?)$/
+     */
+    public function iSearchForImagesUsing($metadata)
+    {
+        $params = array_merge($this->queryParams, ['q' => $metadata]);
+        $path = '/publickey/search?' . http_build_query($params);
+
+        $this->rawRequest($path, 'GET');
+    }
+
+    public function rawRequest($path, $method = 'GET') {
+        if (empty($this->requestHeaders['Accept'])) {
+            $this->requestHeaders['Accept'] = 'application/json';
+        }
+
+        $request = $this->imbo->createRequest($method, $path, $this->requestHeaders);
+
+        $request->send();
+    }
+
+    /**
+     * Get the response to the last request made by the Guzzle client
+     *
+     * @return Response
+     */
+    protected function getLastResponse() {
+        $lastRequest = $this->history->getLastRequest();
+
+        if (!$lastRequest) {
+            return null;
+        }
+
+        return $lastRequest->getResponse();
+    }
+
+    /**
+     * @Then /^I should get a response with "([^"]*)"$/
+     */
+    public function assertResponseStatus($status) {
+        $response = $this->getLastResponse();
+
+        $actual = $response->getStatusCode() . ' ' . $response->getReasonPhrase();
+
+        Assertion::same($status, $actual);
+    }
+
+    /**
+     * @Given I set the :param query param to :value
+     */
+    public function iSetTheQueryParamTo($param, $value)
+    {
+        $this->queryParams[$param] = $value;
     }
 }

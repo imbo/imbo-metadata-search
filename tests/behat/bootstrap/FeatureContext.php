@@ -5,121 +5,162 @@ use Behat\Behat\Context\SnippetAcceptingContext;
 use Behat\Behat\Tester\Exception\PendingException;
 use Behat\Gherkin\Node\PyStringNode;
 use Behat\Gherkin\Node\TableNode;
+use Behat\Gherkin\Node\StepNode;
+use Assert\Assertion;
+
+use Elasticsearch\Client as ElasticsearchClient;
 
 /**
  * Defines application features from the specific context.
  */
 class FeatureContext extends RESTContext implements Context, SnippetAcceptingContext
 {
-    /**
-     * @When I request :arg1 using HTTP :arg2
-     */
-    public function iRequestUsingHttp($arg1, $arg2)
-    {
-        throw new PendingException();
+    public function __construct($url, $documentRoot, $timeout) {
+        parent::__construct($url, $documentRoot, $timeout);
+
+        $this->elasticsearch = new ElasticsearchClient();
     }
 
-     /**
+    /**
      * @Given The following images exist in Imbo:
      */
-    public function theFollowingImagesExistInImbo(TableNode $table)
+    public function theFollowingImagesExistInImbo(TableNode $images)
     {
-        throw new PendingException();
+        foreach ($images as $image) {
+            $this->addImageToImbo($image['file'], json_decode($image['metadata'], true));
+        }
     }
 
     /**
-     * @Given I use :arg1 and :arg2 for public and private keys
+     * @Given /^"([^"]*)" exists in Imbo with metadata (.*)$/
      */
-    public function iUseAndForPublicAndPrivateKeys($arg1, $arg2)
-    {
-        throw new PendingException();
+    public function addImageToImbo($imagePath, $metadata) {
+        $res = $this->imbo->addImage($imagePath);
+
+        if ($metadata) {
+            $this->setImageMetadata($res['imageIdentifier'], $metadata);
+        }
     }
 
     /**
-     * @Given I sign the request
+     * @When /^I set the following metadata on an image with identifier "([^"]*)":$/
      */
-    public function iSignTheRequest()
-    {
-        throw new PendingException();
+    public function setImageMetadata($imageIdentifier, $metadata) {
+        if ($metadata instanceof PyStringNode) {
+            $metadata = json_decode($metadata, true);
+        }
+
+        $this->imbo->replaceMetadata($imageIdentifier, $metadata);
     }
 
     /**
-     * @Given the request body contains:
+     * @Given I patch the metadata of the image with identifier :imageIdentifer with:
      */
-    public function theRequestBodyContains(PyStringNode $string)
+    public function iPatchTheMetadataOfTheImageWithIdentifierWith($imageIdentifer, PyStringNode $metadata)
     {
-        throw new PendingException();
+        if ($metadata instanceof PyStringNode) {
+            $metadata = json_decode($metadata, true);
+        }
+
+        $this->imbo->editMetadata($imageIdentifer, $metadata);
     }
 
     /**
-     * @Then I should get a response with :arg1
+     * @Then Elasticsearch should have the following metadata for :imageIdentifer:
      */
-    public function iShouldGetAResponseWith($arg1)
+    public function elasticsearchShouldHaveTheFollowingMetadataFor($imageIdentifer, PyStringNode $metadata)
     {
-        throw new PendingException();
+        $publicKey = 'publickey';
+
+        $params = [
+            'index' => 'metadata-' . $publicKey,
+            'type' => 'metadata',
+            'id' => $imageIdentifer
+        ];
+
+        $retDoc = $this->elasticsearch->get($params);
+
+        if ($metadata && !$retDoc) {
+            throw new \Exception('Image metadata for ' . $imageIdentifer . ' not found in ES');
+        }
+
+        Assertion::eq(json_encode($retDoc['_source']), (string) $metadata);
     }
 
     /**
-     * @Then Elasticsearch should have the following metadata for :arg1:
+     * @Then Elasticsearch should not have metadata for :imageIdentifer
      */
-    public function elasticsearchShouldHaveTheFollowingMetadataFor($arg1, PyStringNode $string)
+    public function elasticsearchShouldNotHaveMetadataFor($imageIdentifer)
     {
-        throw new PendingException();
+        $publicKey = 'publickey';
+
+        $params = [
+            'index' => 'metadata-' . $publicKey,
+            'type' => 'metadata',
+            'id' => $imageIdentifer
+        ];
+
+        try {
+            $this->elasticsearch->get($params);
+        } catch (\Exception $e) {
+            Assertion::eq(404, $e->getCode());
+
+            return;
+        }
+
+        throw \Exception('Image metadata found for image ' . $imageIdentifer . ' in ES');
     }
 
     /**
-     * @Then Elasticsearch should not have metadata for :arg1
+     * @When I delete metadata from image :imageIdentifier
      */
-    public function elasticsearchShouldNotHaveMetadataFor($arg1)
+    public function deleteMetadataFromImage($imageIdentifier)
     {
-        throw new PendingException();
+        $this->imbo->deleteMetadata($imageIdentifier);
     }
 
     /**
-     * @Given I include this metadata in the query:
+     * @Given /^I include an access token in the query$/
      */
-    public function iIncludeThisMetadataInTheQuery(PyStringNode $string)
-    {
-        throw new PendingException();
+    public function appendAccessToken() {
+        $this->imbo->getEventDispatcher()->addListener('request.before_send', function($event) {
+            $request = $event['request'];
+            $request->getQuery()->remove('accessToken');
+            $accessToken = hash_hmac('sha256', urldecode($request->getUrl()), $this->imbo->getConfig('privateKey'));
+            $request->getQuery()->set('accessToken', $accessToken);
+        }, -100);
     }
 
     /**
-     * @Given I include an access token in the query
+     * @Then /^I should get the (.*?) in the image response list$/
      */
-    public function iIncludeAnAccessTokenInTheQuery()
+    public function iShouldGetTheInTheImageResponseList($imageIdentifers)
     {
-        throw new PendingException();
+        $responseBody = $this->getLastResponse()->json();
+
+        // Build list of expected values
+        $expectedIdentifiers = array_filter(explode(',', $imageIdentifers));
+
+        // Sort the expected identifiers
+        sort($expectedIdentifiers);
+
+        $actualIdentifiers = array_map(function($image) {
+            return $image['imageIdentifier'];
+        }, $responseBody['images']);
+
+        // Sort the actual identifiers
+        sort($actualIdentifiers);
+
+        Assertion::eq($expectedIdentifiers, $actualIdentifiers);
     }
 
     /**
-     * @Given /^I include (\{.*\}) in the query$/
+     * @Then the hit count should be :hits
      */
-    public function iIncludeInTheQuery($arg1)
+    public function theHitCountShouldBe($hits)
     {
-        throw new PendingException();
-    }
+        $body = $this->getLastResponse()->json();
 
-    /**
-     * @Given I set the :arg1 query param to :arg2
-     */
-    public function iSetTheQueryParamTo($arg1, $arg2)
-    {
-        throw new PendingException();
-    }
-
-    /**
-     * @Then /^I should get the (.*) in the image response list$/
-     */
-    public function iShouldGetTheInTheImageResponseList($arg1)
-    {
-        throw new PendingException();
-    }
-
-    /**
-     * @Then the hit count should be :arg1
-     */
-    public function theHitCountShouldBe($arg1)
-    {
-        throw new PendingException();
+        Assertion::eq($body['search']['hits'], $hits);
     }
 }
