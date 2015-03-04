@@ -37,7 +37,7 @@ class RESTContext implements Context
      *
      * @var array
      */
-    protected $queryParams;
+    protected $queryParams = [];
 
     /**
      * Headers for the request
@@ -193,7 +193,11 @@ class RESTContext implements Context
     {
         $params = array_merge($this->queryParams, ['q' => $metadata]);
 
-        $this->rawRequest('/publickey/search.json', 'GET', $params);
+        try {
+            $this->rawRequest('/publickey/search.json', 'GET', $params);
+        } catch (Exception $e) {
+            // We'll assert the status and such later, if we're interested
+        }
     }
 
     public function rawRequest($path, $method = 'GET', $params = []) {
