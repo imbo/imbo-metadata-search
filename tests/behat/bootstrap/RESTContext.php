@@ -192,19 +192,25 @@ class RESTContext implements Context
     public function iSearchForImagesUsing($metadata)
     {
         $params = array_merge($this->queryParams, ['q' => $metadata]);
-        $path = '/publickey/search?' . http_build_query($params);
 
-        $this->rawRequest($path, 'GET');
+        $this->rawRequest('/publickey/search.json', 'GET', $params);
     }
 
-    public function rawRequest($path, $method = 'GET') {
+    public function rawRequest($path, $method = 'GET', $params = []) {
         if (empty($this->requestHeaders['Accept'])) {
             $this->requestHeaders['Accept'] = 'application/json';
         }
 
         $request = $this->imbo->createRequest($method, $path, $this->requestHeaders);
 
+        // Add query params
+        $request->getQuery()->merge($params);
+
+        // Send request
         $request->send();
+
+        // Create a new client instance to get rid of state
+        $this->createClient();
     }
 
     /**
