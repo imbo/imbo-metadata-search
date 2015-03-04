@@ -59,6 +59,10 @@ class RESTContext implements Context
             'timeout' => $timeout
         ];
 
+        // Prepare history plugin for capturing requests and responses
+        $this->history = new HistoryPlugin();
+
+        // Prepare clients
         $this->createClient();
     }
 
@@ -66,8 +70,6 @@ class RESTContext implements Context
      * Create a new HTTP client
      */
     private function createClient() {
-        $this->history = new HistoryPlugin();
-
         $this->imbo = new ImboClient($this->params['url'], array(
             'publicKey' => 'publickey',
             'privateKey' => 'privatekey',
