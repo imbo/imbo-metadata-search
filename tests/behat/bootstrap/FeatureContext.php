@@ -38,10 +38,12 @@ class FeatureContext extends RESTContext implements Context, SnippetAcceptingCon
                 'index' => 'metadata_integration-publickey'
             ]);
         } catch (Exception $e) {
+            // We'll get a 404 if the index is non-existant - ignore it
             if ($e->getCode() === 404) {
                 return;
             }
 
+            // If this was something other than a 404 it's more interesting
             throw $e;
         }
     }
