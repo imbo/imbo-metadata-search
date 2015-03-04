@@ -18,14 +18,6 @@
         "irc": "irc://irc.freenode.net/imbo"
     },
 
-    "COMMENT": "This should be removed when the changes to imbo-codesniffer is published to packagist",
-    "repositories": [
-        {
-            "type": "vcs",
-            "url": "https://github.com/kbrabrand/imbo-codesniffer"
-        }
-    ],
-
     "require": {
         "php": ">=5.4.0"
     },
@@ -35,7 +27,11 @@
         "imbo/imbo": "~1.2.3",
         "behat/behat": "~3.0",
         "squizlabs/php_codesniffer": "~2.2",
-        "imbo/imbo-phpcs-standard": "dev-master"
+        "imbo/imbo-phpcs-standard": "dev-master",
+        "elasticsearch/elasticsearch": "~1.3",
+        "imbo/imboclient": "~1.2",
+        "beberlei/assert": "~2.3",
+        "guzzle/plugin-history": "~3.9"
     },
     "suggest": {
         "elasticsearch/elasticsearch": "Enables usage of elasticsearch as search backend. Recommended version: >=1.3.0"

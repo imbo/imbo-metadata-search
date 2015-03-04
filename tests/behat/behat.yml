@@ -5,3 +5,15 @@ default:
     default:
       paths:
         - %paths.base%/features
+
+      contexts:
+        - FeatureContext:
+            # URL to use for the functional tests with the built in httpd in php-5.4
+            url: "http://localhost:8888"
+
+            # Document root and router used by the httpd
+            documentRoot: %paths.base%/imbo-docroot
+            router: %paths.base%/imbo-docroot/index.php
+
+            # Timeout when trying to connect to the built in httpd
+            timeout: 5

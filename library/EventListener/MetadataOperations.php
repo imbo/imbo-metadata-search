@@ -33,35 +33,29 @@ class MetadataOperations implements ListenerInterface {
 
     public static function getSubscribedEvents() {
         return [
-            'metadata.post'   => ['post' => -1000],
-            'metadata.put'    => ['put' => -1000],
+            'metadata.post'   => ['set' => -1000],
+            'metadata.put'    => ['set' => -1000],
             'metadata.delete' => ['delete' => -1000],
             'metadata.search' => 'search',
         ];
     }
 
     /**
-     * Partial metadata update (POST) handler
+     * Update metadata for an image
      *
      * @param Imbo\EventListener\ListenerInterface $event The current event
      */
-    public function post(EventInterface $event) {
-        // Post operation
-    }
-
-    /**
-     * Add/replace metadata (PUT) handler
-     *
-     * @param Imbo\EventListener\ListenerInterface $event The current event
-     */
-    public function put(EventInterface $event) {
+    public function set(EventInterface $event) {
         $request = $event->getRequest();
-        $metadata = json_decode($request->getContent(), true);
 
+        // Get the metadata set by imbo
+        $metadata = $event->getResponse()->getModel();
+
+        // Trigger update of metadata in search backend
         $this->backend->set(
             $request->getPublicKey(),
             $request->getImageIdentifier(),
-            $metadata
+            $metadata->getData()
         );
     }
 

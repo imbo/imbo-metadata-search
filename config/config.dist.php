@@ -17,6 +17,6 @@ return [
     ],
 
     'routes' => [
-        'search' => '#^/search(\.(?<extension>json|xml))?$#',
+        'search' => '#^/(?<publicKey>[a-z0-9_-]{3,})/search(\.(?<extension>json|xml))?#',
     ],
 ];
