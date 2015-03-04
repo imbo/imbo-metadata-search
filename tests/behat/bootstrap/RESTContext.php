@@ -51,10 +51,11 @@ class RESTContext implements Context
      *
      * @param array $parameters Context parameters
      */
-    public function __construct($url, $documentRoot, $timeout) {
+    public function __construct($url, $documentRoot, $router, $timeout) {
         $this->params = [
             'url' => $url,
             'documentRoot' => $documentRoot,
+            'router' => $router,
             'timeout' => $timeout
         ];
 
@@ -102,7 +103,8 @@ class RESTContext implements Context
         $pid = self::startBuiltInHttpd(
             $url['host'],
             $port,
-            $params['documentRoot']
+            $params['documentRoot'],
+            $params['router']
         );
 
         if (!$pid) {
@@ -144,14 +146,16 @@ class RESTContext implements Context
      * @param string $host The hostname to use
      * @param int $port The port to use
      * @param string $documentRoot The document root
+     * @param string $router The web server router
      * @return int Returns the PID of the httpd
      * @throws RuntimeException
      */
-    private static function startBuiltInHttpd($host, $port, $documentRoot) {
-        $command = sprintf('php -S %s:%d -t %s >/dev/null 2>&1 & echo $!',
+    private static function startBuiltInHttpd($host, $port, $documentRoot, $router) {
+        $command = sprintf('php -S %s:%d -t %s %s >/dev/null 2>&1 & echo $!',
                             $host,
                             $port,
-                            $documentRoot);
+                            $documentRoot,
+                            $router);
 
         $output = array();
         exec($command, $output);

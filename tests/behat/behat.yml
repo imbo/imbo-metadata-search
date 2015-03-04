@@ -13,6 +13,7 @@ default:
 
             # Document root and router used by the httpd
             documentRoot: %paths.base%/imbo-docroot
+            router: %paths.base%/imbo-docroot/index.php
 
             # Timeout when trying to connect to the built in httpd
             timeout: 5
