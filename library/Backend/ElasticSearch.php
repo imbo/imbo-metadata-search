@@ -2,10 +2,12 @@
 
 namespace Imbo\MetadataSearch\Backend;
 
-use Imbo\MetadataSearch\Interfaces\SearchBackendInterface,
+use Imbo\MetadataSearch\Dsl\Transformations\ElasticSearchDsl,
+    Imbo\MetadataSearch\Interfaces\SearchBackendInterface,
     Imbo\MetadataSearch\Interfaces\DslAstInterface,
-    Imbo\MetadataSearch\Model\BackendResponse,
-    Elasticsearch\Client as ElasticsearchClient;
+    Imbo\MetadataSearch\Model\ElasticsearchResponse,
+    Elasticsearch\Client as ElasticsearchClient,
+    Imbo\Exception\RuntimeException;
 
 /**
  * Elasticsearch search backend for metadata search
@@ -62,17 +64,35 @@ class ElasticSearch implements SearchBackendInterface {
      * {@inheritdoc}
      */
     public function search($publicKey, DslAstInterface $ast, array $queryParams) {
-        // Transform $ast to ES query here, query and return imageIdentifers
+        $limit = isset($queryParams['limit']) ? (int) $queryParams['limit'] : 10;
+        $page = isset($queryParams['page']) ? (int) $queryParams['page'] : 1;
 
-        $response = new BackendResponse();
+        // Ensure limit are both positive values
+        $limit = max($limit, 1);
+        $page = max($page, 1);
 
-        $response->setImageIdentifiers([
-            'a43e8662ed3476e0e22f80c01b0b28d8'
-        ]);
+        $astTransformer = new ElasticSearchDsl();
 
-        $response->setHits(1);
+        // Transform AST to ES query
+        $query = $astTransformer->transform($ast);
 
-        return $response;
+        $params = $this->prepareParams(
+            $publicKey,
+            null,
+            $query
+        );
+
+        $params['from'] = ($page - 1) * $limit;
+        $params['size'] = $limit;
+
+        try {
+            $queryResult = $this->client->search($params);
+        } catch (\Exception $e) {
+            throw new RuntimeException('Metadata search failed: ' . $e->getMessage(), 503);
+        }
+
+        // Create and return search response model
+        return new ElasticsearchResponse($queryResult);
     }
 
     /**
