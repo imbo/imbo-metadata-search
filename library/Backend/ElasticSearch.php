@@ -18,8 +18,14 @@ class ElasticSearch implements SearchBackendInterface {
      */
     protected $client;
 
-    public function __construct(ElasticsearchClient $client) {
+    /**
+     * @var string
+     */
+    protected $indexPrefix;
+
+    public function __construct(ElasticsearchClient $client, $indexPrefix = 'metadata-') {
         $this->client = $client;
+        $this->indexPrefix = $indexPrefix;
     }
 
     /**
@@ -77,17 +83,24 @@ class ElasticSearch implements SearchBackendInterface {
      * @param array $metadata
      * @return array
      */
-    protected function prepareParams($publicKey, $imageIdentifier, $metadata = null) {
+    protected function prepareParams($publicKey, $imageIdentifier = null, $body = null) {
         $params = [
-            'index' => 'metadata-' . $publicKey,
-            'type' => 'metadata',
-            'id' => $imageIdentifier
+            'index' => $this->getIndexName($publicKey),
+            'type' => 'metadata'
         ];
 
-        if ($metadata !== null) {
-            $params['body'] = $metadata;
+        if ($imageIdentifier !== null) {
+            $params['id'] = $imageIdentifier;
+        }
+
+        if ($body !== null) {
+            $params['body'] = $body;
         }
 
         return $params;
+    }
+
+    public function getIndexName($publicKey) {
+        return $this->indexPrefix . $publicKey;
     }
 }
