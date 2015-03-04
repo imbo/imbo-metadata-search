@@ -6,7 +6,8 @@ use Imbo\EventListener\ListenerInterface,
     Imbo\EventManager\EventInterface,
     Imbo\Exception\InvalidArgumentException,
     Imbo\MetadataSearch\Interfaces\SearchBackendInterface,
-    Imbo\MetadataSearch\Dsl\Parser as DslParser;
+    Imbo\MetadataSearch\Dsl\Parser as DslParser,
+    Imbo\Exception\RuntimeException;
 
 /**
  * Metadata event listener
@@ -108,7 +109,11 @@ class MetadataOperations implements ListenerInterface {
         ];
 
         // Parse the query JSON and transform it to an AST
-        $ast = DslParser::parse($metadataQuery);
+        try {
+            $ast = DslParser::parse($metadataQuery);
+        } catch (\Exception $e) {
+            throw new RuntimeException('Invalid metadata query', 400);
+        }
 
         // Query backend using the AST
         $backendResponse = $this->backend->search(
