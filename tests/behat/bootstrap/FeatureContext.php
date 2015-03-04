@@ -7,7 +7,6 @@ use Behat\Gherkin\Node\PyStringNode;
 use Behat\Gherkin\Node\TableNode;
 use Behat\Gherkin\Node\StepNode;
 use Assert\Assertion;
-
 use Elasticsearch\Client as ElasticsearchClient;
 
 /**
@@ -19,6 +18,32 @@ class FeatureContext extends RESTContext implements Context, SnippetAcceptingCon
         parent::__construct($url, $documentRoot, $router, $timeout);
 
         $this->elasticsearch = new ElasticsearchClient();
+    }
+
+    /**
+     * @BeforeScenario
+     * @AfterSuite
+     */
+    public static function cleanup() {
+        // Drop mongo test databases
+        $mongo = new MongoClient();
+        $mongo->metadatasearch_integration_db->drop();
+        $mongo->metadatasearch_integration_storage->drop();
+
+        // Delete the elasticsearch metadata test index
+        $elasticsearch = new ElasticsearchClient();
+
+        try {
+            $elasticsearch->indices()->delete([
+                'index' => 'metadata_integration-publickey'
+            ]);
+        } catch (Exception $e) {
+            if ($e->getCode() === 404) {
+                return;
+            }
+
+            throw $e;
+        }
     }
 
     /**
@@ -73,7 +98,7 @@ class FeatureContext extends RESTContext implements Context, SnippetAcceptingCon
         $publicKey = 'publickey';
 
         $params = [
-            'index' => 'metadata-' . $publicKey,
+            'index' => 'metadata_integration-' . $publicKey,
             'type' => 'metadata',
             'id' => $imageIdentifer
         ];
@@ -95,7 +120,7 @@ class FeatureContext extends RESTContext implements Context, SnippetAcceptingCon
         $publicKey = 'publickey';
 
         $params = [
-            'index' => 'metadata-' . $publicKey,
+            'index' => 'metadata_integration-' . $publicKey,
             'type' => 'metadata',
             'id' => $imageIdentifer
         ];
@@ -108,7 +133,7 @@ class FeatureContext extends RESTContext implements Context, SnippetAcceptingCon
             return;
         }
 
-        throw \Exception('Image metadata found for image ' . $imageIdentifer . ' in ES');
+        throw new \Exception('Image metadata found for image ' . $imageIdentifer . ' in ES');
     }
 
     /**
