@@ -38,6 +38,10 @@ Feature: Use elasticsearch as search backend for the metadata search pluin
         {"animal":"Giant Panda","foo":"bar"}
         """
 
+    Scenario: Search without using an access token
+        When I search for images using {"animal":"Snake"}
+        Then I should get a response with "400 Missing access token"
+
     Scenario Outline: Search using metadata queries
         Given I include an access token in the query
         And I set the "limit" query param to "<limit>"
