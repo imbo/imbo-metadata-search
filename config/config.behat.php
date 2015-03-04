@@ -8,11 +8,15 @@ $config = [
     ],
 
     'database' => function() {
-        return new \Imbo\Database\MongoDB();
+        return new \Imbo\Database\MongoDB([
+            'databaseName' => 'metadatasearch_integration_db'
+        ]);
     },
 
     'storage' => function() {
-        return new \Imbo\Storage\GridFS();
+        return new \Imbo\Storage\GridFS([
+            'databaseName' => 'metadatasearch_integration_storage'
+        ]);
     },
 
     'contentNegotiateImages' => true,
@@ -32,7 +36,10 @@ $config = [
         'metadata-access-token' => new EventListener\AccessToken(),
         'metadata' => [
             'listener' => new EventListener\MetadataOperations([
-                'backend' => new Backend\ElasticSearch(new \Elasticsearch\Client())
+                'backend' => new Backend\ElasticSearch(
+                    new \Elasticsearch\Client(),
+                    'metadata_integration-'
+                )
             ])
         ],
     ],
