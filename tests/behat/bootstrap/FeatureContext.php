@@ -35,7 +35,7 @@ class FeatureContext extends RESTContext implements Context, SnippetAcceptingCon
 
         try {
             $elasticsearch->indices()->delete([
-                'index' => 'metadata_integration-publickey'
+                'index' => 'metadata_integration-*'
             ]);
         } catch (Exception $e) {
             // We'll get a 404 if the index is non-existant - ignore it
