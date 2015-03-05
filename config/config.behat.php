@@ -38,7 +38,7 @@ $config = [
             'listener' => new EventListener\MetadataOperations([
                 'backend' => new Backend\ElasticSearch(
                     new \Elasticsearch\Client(),
-                    'metadata_integration-'
+                    'metadatasearch_integration-'
                 )
             ])
         ],
