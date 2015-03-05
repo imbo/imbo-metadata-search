@@ -108,6 +108,14 @@ class MetadataOperations implements ListenerInterface {
             'to' => $params->get('to'),
         ];
 
+        if ($queryParams['page'] < 1) {
+            throw new RuntimeException('Invalid param. "page" must be a positive number.', 400);
+        }
+
+        if ($queryParams['limit'] < 1) {
+            throw new RuntimeException('Invalid param. "limit" must be a positive number.', 400);
+        }
+
         // Parse the query JSON and transform it to an AST
         try {
             $ast = DslParser::parse($metadataQuery);

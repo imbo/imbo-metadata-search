@@ -64,13 +64,6 @@ class ElasticSearch implements SearchBackendInterface {
      * {@inheritdoc}
      */
     public function search($publicKey, DslAstInterface $ast, array $queryParams) {
-        $limit = isset($queryParams['limit']) ? (int) $queryParams['limit'] : 10;
-        $page = isset($queryParams['page']) ? (int) $queryParams['page'] : 1;
-
-        // Ensure limit are both positive values
-        $limit = max($limit, 1);
-        $page = max($page, 1);
-
         $astTransformer = new ElasticSearchDsl();
 
         // Transform AST to ES query
@@ -82,8 +75,8 @@ class ElasticSearch implements SearchBackendInterface {
             $query
         );
 
-        $params['from'] = ($page - 1) * $limit;
-        $params['size'] = $limit;
+        $params['from'] = ($queryParams['page'] - 1) * $queryParams['limit'];
+        $params['size'] = $queryParams['limit'];
 
         try {
             $queryResult = $this->client->search($params);
