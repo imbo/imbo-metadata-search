@@ -175,15 +175,10 @@ class FeatureContext extends RESTContext implements Context, SnippetAcceptingCon
         // Build list of expected values
         $expectedIdentifiers = array_filter(explode(',', $imageIdentifers));
 
-        // Sort the expected identifiers
-        sort($expectedIdentifiers);
-
         $actualIdentifiers = array_map(function($image) {
             return $image['imageIdentifier'];
         }, $responseBody['images']);
 
-        // Sort the actual identifiers
-        sort($actualIdentifiers);
 
         Assertion::eq($expectedIdentifiers, $actualIdentifiers);
     }
