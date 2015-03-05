@@ -7,7 +7,8 @@ use Imbo\EventListener\ListenerInterface,
     Imbo\Exception\InvalidArgumentException,
     Imbo\MetadataSearch\Interfaces\SearchBackendInterface,
     Imbo\MetadataSearch\Dsl\Parser as DslParser,
-    Imbo\Exception\RuntimeException;
+    Imbo\Exception\RuntimeException,
+    Imbo\Model\Images as ImagesModel;
 
 /**
  * Metadata event listener
@@ -130,10 +131,28 @@ class MetadataOperations implements ListenerInterface {
             $queryParams
         );
 
-        // Modify the request params before triggering images load
+        // If we didn't get hits in the search backend, prepare a response
+        if (!$backendResponse->getImageIdentifiers()) {
+            // Create the model and set some pagination values
+            $model = new ImagesModel();
+            $model->setLimit($queryParams['limit'])
+                  ->setPage($queryParams['page'])
+                  ->setHits($backendResponse->getHits());
+
+            $response = $event->getResponse();
+            $response->setModel($model);
+
+            return;
+        }
+
+        // Set the ids to fetch from the Imbo backend
         $params->set('ids', $backendResponse->getImageIdentifiers());
+
+        // In order to paginate the already paginated resultset, we'll
+        // set the page param to 0 before triggering db.images.load
         $params->set('page', 0);
 
+        // Trigger image loading from imbo DB
         $event->getManager()->trigger('db.images.load');
         $responseModel = $event->getResponse()->getModel();
 
