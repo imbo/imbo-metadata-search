@@ -179,8 +179,16 @@ class FeatureContext extends RESTContext implements Context, SnippetAcceptingCon
             return $image['imageIdentifier'];
         }, $responseBody['images']);
 
+        try {
+            Assertion::eq($expectedIdentifiers, $actualIdentifiers);
+        } catch (\Exception $e) {
+            print_r([
+                'expected' => $expectedIdentifiers,
+                'actual' => $actualIdentifiers
+            ]);
 
-        Assertion::eq($expectedIdentifiers, $actualIdentifiers);
+            throw $e;
+        }
     }
 
     /**
