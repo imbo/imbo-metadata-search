@@ -10,6 +10,7 @@ Feature: Use elasticsearch as search backend for the metadata search pluin
             | tests/fixtures/hedgehog.jpg      | {"animal":"Hedgehog"}                 |
             | tests/fixtures/kitten.jpg        | {"animal":"Cat", "color":"red"}       |
             | tests/fixtures/prairie-dog.jpg   | {"animal":"Dog"}                      |
+        And I have flushed the elasticsearch transaction log
 
     Scenario: Updating metadata
         When I set the following metadata on an image with identifier "574e32fb252f3c157c9b31babb0868c2":

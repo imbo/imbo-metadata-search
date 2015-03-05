@@ -59,6 +59,13 @@ class FeatureContext extends RESTContext implements Context, SnippetAcceptingCon
     }
 
     /**
+     * @Given I have flushed the elasticsearch transaction log
+     */
+    public function flushElasticsearch() {
+        $this->elasticsearch->indices()->flush();
+    }
+
+    /**
      * @Given /^"([^"]*)" exists in Imbo with metadata (.*)$/
      */
     public function addImageToImbo($imagePath, $metadata) {
