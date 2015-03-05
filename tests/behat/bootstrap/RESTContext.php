@@ -51,11 +51,12 @@ class RESTContext implements Context
      *
      * @param array $parameters Context parameters
      */
-    public function __construct($url, $documentRoot, $router, $timeout) {
+    public function __construct($url, $documentRoot, $router, $httpdLog, $timeout) {
         $this->params = [
             'url' => $url,
             'documentRoot' => $documentRoot,
             'router' => $router,
+            'httpdLog' => $httpdLog,
             'timeout' => $timeout
         ];
 
@@ -102,11 +103,17 @@ class RESTContext implements Context
             throw new RuntimeException('Something is already running on ' . $params['url'] . '. Aborting tests.');
         }
 
+        // Empty httpd log before starting new server
+        if (is_writeable($params['httpdLog'])) {
+            file_put_contents($params['httpdLog'], '');
+        }
+
         $pid = self::startBuiltInHttpd(
             $url['host'],
             $port,
             $params['documentRoot'],
-            $params['router']
+            $params['router'],
+            $params['httpdLog']
         );
 
         if (!$pid) {
@@ -149,15 +156,17 @@ class RESTContext implements Context
      * @param int $port The port to use
      * @param string $documentRoot The document root
      * @param string $router The web server router
+     * @param string $httpdLog Location of httpd log
      * @return int Returns the PID of the httpd
      * @throws RuntimeException
      */
-    private static function startBuiltInHttpd($host, $port, $documentRoot, $router) {
-        $command = sprintf('php -S %s:%d -t %s %s >/dev/null 2>&1 & echo $!',
+    private static function startBuiltInHttpd($host, $port, $documentRoot, $router, $httpdLog) {
+        $command = sprintf('php -S %s:%d -t %s %s > %s 2>&1 & echo $!',
                             $host,
                             $port,
                             $documentRoot,
-                            $router);
+                            $router,
+                            $httpdLog);
 
         $output = array();
         exec($command, $output);

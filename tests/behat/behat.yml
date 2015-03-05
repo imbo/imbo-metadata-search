@@ -17,3 +17,6 @@ default:
 
             # Timeout when trying to connect to the built in httpd
             timeout: 5
+
+            # httpd log file location
+            httpdLog: %paths.base%/logs/php-httpd.log

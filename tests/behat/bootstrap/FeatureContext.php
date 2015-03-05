@@ -14,8 +14,8 @@ use Elasticsearch\Client as ElasticsearchClient;
  */
 class FeatureContext extends RESTContext implements Context, SnippetAcceptingContext
 {
-    public function __construct($url, $documentRoot, $router, $timeout) {
-        parent::__construct($url, $documentRoot, $router, $timeout);
+    public function __construct($url, $documentRoot, $router, $httpdLog, $timeout) {
+        parent::__construct($url, $documentRoot, $router, $httpdLog, $timeout);
 
         $this->elasticsearch = new ElasticsearchClient();
     }
