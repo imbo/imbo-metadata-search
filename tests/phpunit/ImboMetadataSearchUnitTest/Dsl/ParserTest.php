@@ -37,7 +37,7 @@ class ParserTest extends \PHPUnit_Framework_TestCase {
             ),
             'mixed case' => array(
                 'original' => array('Foo' => 'Bar'),
-                'expected' => new Field('foo', new Equals('bar')),
+                'expected' => new Field('Foo', new Equals('Bar')),
             ),
             'implicit $and at the root, as string' => array(
                 'original' => '{"foo": "bar", "baz": "blargh"}',
@@ -87,13 +87,13 @@ class ParserTest extends \PHPUnit_Framework_TestCase {
                                 ]
                                }',
                 'expected' => new Conjunction([
-                                  new Field('name', new NotEquals('wit')),
+                                  new Field('name', new NotEquals('Wit')),
                                   new Disjunction([
-                                      new Field('brewery', new Equals('nøgne ø')),
+                                      new Field('brewery', new Equals('Nøgne Ø')),
                                       new Conjunction([
                                           new Field('abv', new GreaterThanEquals(5.5)),
-                                          new Field('style', new In(['ipa', 'imperial stout'])),
-                                          new Field('brewery', new In(['haandbryggeriet', 'ægir'])),
+                                          new Field('style', new In(['IPA', 'Imperial Stout'])),
+                                          new Field('brewery', new In(['HaandBryggeriet', 'Ægir'])),
                                       ]),
                                   ]),
                               ]),
