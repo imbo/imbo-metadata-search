@@ -33,7 +33,7 @@ In order for the metadata search plugin to be registered and actually do somethi
 After installing with composer you will find a basic config file for the metadata search in `vendor/imbo/imbo-metadata-search/config.dist.php`. If you want to make changes to the file you should copy it to your config folder.
 
 ## Usage
-```
+```js
 GET /search.json?q={"animal":"dog"}
 {
     search: {
@@ -70,4 +70,5 @@ GET /search.json?q={"animal":"dog"}
             publicKey: "publickey"
         }
     ]
-}```
+}
+```
