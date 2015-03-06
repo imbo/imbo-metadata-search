@@ -19,4 +19,4 @@ default:
             timeout: 5
 
             # httpd log file location
-            httpdLog: %paths.base%/logs/php-httpd.log
+            httpdLog: /dev/null
