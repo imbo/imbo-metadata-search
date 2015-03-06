@@ -74,6 +74,13 @@ class ParserTest extends \PHPUnit_Framework_TestCase {
                                   new Field('foo', new LessThanEquals(15)),
                               ])
             ),
+            'in and not-in is accepted with arrays' => array(
+                'original' => '{"$or": [{"field": {"$in": [1, 2, 3]}}, {"field": {"$nin": [5, 6 ,7]}}]}',
+                'expected' => new Disjunction([
+                                  new Field('field', new In([1, 2, 3])),
+                                  new Field('field', new NotIn([5, 6, 7])),
+                              ])
+            ),
             'a larger, more complex query' => array(
                 'original' => '{
                                 "name": { "$ne": "Wit" },
@@ -126,6 +133,10 @@ class ParserTest extends \PHPUnit_Framework_TestCase {
             'using an operator that is not supported ($regex)' => array(
                 'query' => array('category' => array('$regex' => '(foo|bar|baz)')),
                 'message' => 'Operator of the type $regex not allowed',
+            ),
+            'specifying a non-array for a operator' => array(
+                'query' => '{"$or": 3}',
+                'message' => 'Contents of the $or-expression is not an array',
             ),
             'not specifing an operator on a field' => array(
                 'query' => '{"category": []}',
