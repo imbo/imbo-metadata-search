@@ -37,7 +37,7 @@ class ParserTest extends \PHPUnit_Framework_TestCase {
             ),
             'mixed case' => array(
                 'original' => array('Foo' => 'Bar'),
-                'expected' => new Field('foo', new Equals('bar')),
+                'expected' => new Field('Foo', new Equals('Bar')),
             ),
             'implicit $and at the root, as string' => array(
                 'original' => '{"foo": "bar", "baz": "blargh"}',
@@ -74,6 +74,13 @@ class ParserTest extends \PHPUnit_Framework_TestCase {
                                   new Field('foo', new LessThanEquals(15)),
                               ])
             ),
+            'in and not-in is accepted with arrays' => array(
+                'original' => '{"$or": [{"field": {"$in": [1, 2, 3]}}, {"field": {"$nin": [5, 6 ,7]}}]}',
+                'expected' => new Disjunction([
+                                  new Field('field', new In([1, 2, 3])),
+                                  new Field('field', new NotIn([5, 6, 7])),
+                              ])
+            ),
             'a larger, more complex query' => array(
                 'original' => '{
                                 "name": { "$ne": "Wit" },
@@ -87,13 +94,13 @@ class ParserTest extends \PHPUnit_Framework_TestCase {
                                 ]
                                }',
                 'expected' => new Conjunction([
-                                  new Field('name', new NotEquals('wit')),
+                                  new Field('name', new NotEquals('Wit')),
                                   new Disjunction([
-                                      new Field('brewery', new Equals('nøgne ø')),
+                                      new Field('brewery', new Equals('Nøgne Ø')),
                                       new Conjunction([
                                           new Field('abv', new GreaterThanEquals(5.5)),
-                                          new Field('style', new In(['ipa', 'imperial stout'])),
-                                          new Field('brewery', new In(['haandbryggeriet', 'ægir'])),
+                                          new Field('style', new In(['IPA', 'Imperial Stout'])),
+                                          new Field('brewery', new In(['HaandBryggeriet', 'Ægir'])),
                                       ]),
                                   ]),
                               ]),
@@ -126,6 +133,10 @@ class ParserTest extends \PHPUnit_Framework_TestCase {
             'using an operator that is not supported ($regex)' => array(
                 'query' => array('category' => array('$regex' => '(foo|bar|baz)')),
                 'message' => 'Operator of the type $regex not allowed',
+            ),
+            'specifying a non-array for a operator' => array(
+                'query' => '{"$or": 3}',
+                'message' => 'Contents of the $or-expression is not an array',
             ),
             'not specifing an operator on a field' => array(
                 'query' => '{"category": []}',

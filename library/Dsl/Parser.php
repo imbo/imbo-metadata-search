@@ -67,39 +67,11 @@ class Parser {
             throw new \InvalidArgumentException('Query must be a JSON object or array', 400);
         }
 
-        $query = self::lowercase($json);
-
-        $normalizedQuery = self::normalizeExpression($query);
+        $normalizedQuery = self::normalizeExpression($json);
 
         $ast = self::convertQueryToAst($normalizedQuery);
 
         return $ast;
-    }
-
-    /**
-     * Lowercases a query
-     *
-     * This method will lowercase all field names and values to make the search case insensitive.
-     *
-     * @param array $query The metadata query from the query string
-     * @return array
-     */
-    private static function lowercase(array $query) {
-        $result = array();
-
-        foreach ($query as $key => $value) {
-            $key = strtolower($key);
-
-            if (is_array($value)) {
-                $value = self::lowercase($value);
-            } else if (is_string($value)) {
-                $value = mb_strtolower($value, 'UTF-8');
-            }
-
-            $result[$key] = $value;
-        }
-
-        return $result;
     }
 
     /**
