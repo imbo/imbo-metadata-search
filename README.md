@@ -1,6 +1,5 @@
 # imbo-metadata-search
-Imbo plugin that enables metadata search.
-
+The metadata search event listener hooks onto metadata updates for your images and keeps the search backend of your choice up to date, and allows you to find images by querying its metadata.
 
 [![Current build Status](https://secure.travis-ci.org/imbo/imbo-metadata-search.png)](http://travis-ci.org/imbo/imbo-metadata-search)
 
@@ -34,3 +33,41 @@ In order for the metadata search plugin to be registered and actually do somethi
 After installing with composer you will find a basic config file for the metadata search in `vendor/imbo/imbo-metadata-search/config.dist.php`. If you want to make changes to the file you should copy it to your config folder.
 
 ## Usage
+```
+GET /search.json?q={"animal":"dog"}
+{
+    search: {
+        hits: 2,
+        page: 1,
+        limit: 20,
+        count: 0
+    },
+    images: [
+        {
+            added: "Tue, 03 Mar 2015 09:15:31 GMT",
+            updated: "Thu, 05 Mar 2015 12:21:51 GMT",
+            checksum: "3012ee0319a7f752ac615d8d86b63894",
+            originalChecksum: "3012ee0319a7f752ac615d8d86b63894",
+            extension: "jpg",
+            size: 68012,
+            width: 800,
+            height: 600,
+            mime: "image/jpeg",
+            imageIdentifier: "3012ee0319a7f752ac615d8d86b63894",
+            publicKey: "publickey"
+        },
+        {
+            added: "Tue, 03 Mar 2015 09:15:31 GMT",
+            updated: "Wed, 04 Mar 2015 12:42:27 GMT",
+            checksum: "ce3e8c3de4b67e8af5315be82ec36692",
+            originalChecksum: "ce3e8c3de4b67e8af5315be82ec36692",
+            extension: "jpg",
+            size: 63602,
+            width: 640,
+            height: 425,
+            mime: "image/jpeg",
+            imageIdentifier: "ce3e8c3de4b67e8af5315be82ec36692",
+            publicKey: "publickey"
+        }
+    ]
+}```
