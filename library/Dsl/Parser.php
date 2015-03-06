@@ -2,7 +2,8 @@
 
 namespace Imbo\MetadataSearch\Dsl;
 
-use Imbo\MetadataSearch\Dsl\Ast\Conjunction,
+use Imbo\Exception\InvalidArgumentException,
+    Imbo\MetadataSearch\Dsl\Ast\Conjunction,
     Imbo\MetadataSearch\Dsl\Ast\Disjunction,
     Imbo\MetadataSearch\Dsl\Ast\Field,
     Imbo\MetadataSearch\Dsl\Ast\Comparison\Equals,
@@ -59,12 +60,12 @@ class Parser {
             if ($input === "") {
                 $json = [];
             } else {
-                throw new \InvalidArgumentException('Query must be valid JSON', 400);
+                throw new InvalidArgumentException('Query must be valid JSON', 400);
             }
         }
 
         if (is_string($json) || is_numeric($json)) {
-            throw new \InvalidArgumentException('Query must be a JSON object or array', 400);
+            throw new InvalidArgumentException('Query must be a JSON object or array', 400);
         }
 
         $query = self::lowercase($json);
@@ -125,7 +126,7 @@ class Parser {
                 // one that we allow
                 if (empty(self::$validQueryDslExpressions[$key])) {
                     // It wasn't an allowed expression, so throw an exception
-                    throw new \InvalidArgumentException('Expressions of the type ' . $key . ' not allowed. Only allowed expressions are: ' . implode(', ', array_keys(self::$validQueryDslExpressions)), 400);
+                    throw new InvalidArgumentException('Expressions of the type ' . $key . ' not allowed. Only allowed expressions are: ' . implode(', ', array_keys(self::$validQueryDslExpressions)), 400);
                 }
 
                 if (is_array($ast[$key])) {
@@ -134,7 +135,7 @@ class Parser {
                 } else {
                     // Our expression wasn't actually an expression, because it
                     // didn't have any parameters/data associated with it...
-                    throw new \InvalidArgumentException('Contents of the ' . $key . '-expression is not an array', 400);
+                    throw new InvalidArgumentException('Contents of the ' . $key . '-expression is not an array', 400);
                 }
             } else {
                 // Our expression was a field-operation, so we normalize the it
@@ -176,7 +177,7 @@ class Parser {
 
             if (empty($value)) {
                 // Except it wasn't, because it was an empty array
-                throw new \InvalidArgumentException('No operations defined for the criteria on "' . $field . '"');
+                throw new InvalidArgumentException('No operations defined for the criteria on "' . $field . '"');
             }
 
             $result = array();
@@ -186,12 +187,12 @@ class Parser {
                     // We have found something that wasn't an operation. This
                     // means that it was actually an embedded document that we
                     // do not support.
-                    throw new \InvalidArgumentException('Imbo does not support exact matches on embedded documents. Please use dot-syntax instead');
+                    throw new InvalidArgumentException('Imbo does not support exact matches on embedded documents. Please use dot-syntax instead');
                 }
 
                 // Check that the operator is allowed
                 if (empty(self::$validQueryDslOperators[$key])) {
-                    throw new \InvalidArgumentException('Operator of the type ' . $key . ' not allowed');
+                    throw new InvalidArgumentException('Operator of the type ' . $key . ' not allowed');
                 }
 
                 // Do some type-checking on the value for the operation
@@ -199,13 +200,13 @@ class Parser {
                     // If the operator is $in or $nin (not in), we check that
                     // the argument given is actually an array
                     if (!is_array($value)) {
-                        throw new \InvalidArgumentException('The operator ' . $key . ' must be called with an array');
+                        throw new InvalidArgumentException('The operator ' . $key . ' must be called with an array');
                     }
                 } else {
                     // The operator is not working on sets, we the value can't
                     // be an array
                     if (is_array($value)) {
-                        throw new \InvalidArgumentException('The operator ' . $key . ' must not be called with an array');
+                        throw new InvalidArgumentException('The operator ' . $key . ' must not be called with an array');
                     }
                 }
 

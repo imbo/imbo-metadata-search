@@ -118,11 +118,7 @@ class MetadataOperations implements ListenerInterface {
         }
 
         // Parse the query JSON and transform it to an AST
-        try {
-            $ast = DslParser::parse($metadataQuery);
-        } catch (\Exception $e) {
-            throw new RuntimeException('Invalid metadata query', 400);
-        }
+        $ast = DslParser::parse($metadataQuery);
 
         // Query backend using the AST
         $backendResponse = $this->backend->search(
