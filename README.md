@@ -5,11 +5,11 @@ The metadata search event listener hooks onto metadata updates for your images a
 
 ## Installation
 ### Setting up the depenencies
-If you've installed Imbo through composer getting the metadata search up and running is really simple. Simply add `imbo/imbo-metadata-search` as a dependency. 
+If you've installed Imbo through composer, getting the metadata search up and running is really simple. Simply add `imbo/imbo-metadata-search` as a dependency. 
 
-In addition to the metadata search plugin you'll need a search backend client. Right now the plugin ships with support for Elasticsearch only, so you'll want to add `elasticsearch/elasticsearch` as well in order to be able to use Elasticsearch as search backend.
+In addition to the metadata search plugin you'll need a search backend client. Right now the plugin ships with support for elasticsearch only, so you'll want to add `elasticsearch/elasticsearch` as well in order to be able to use it as search backend.
 
-At the time of writing this, the `imbo-metadata-search` has not yet been published to packagist.com, so you'll need to add the github.com url as a repository in your composer.json.
+At the time of writing, the `imbo-metadata-search` has not yet been published to [Packagist](http://packagist.com), so you'll need to add the github.com url as a repository in your `composer.json`.
 
 ```json
 {
