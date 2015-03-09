@@ -7,7 +7,6 @@ use Behat\Gherkin\Node\PyStringNode;
 use Behat\Gherkin\Node\TableNode;
 use Behat\Gherkin\Node\StepNode;
 use Assert\Assertion;
-
 use Elasticsearch\Client as ElasticsearchClient;
 
 /**
@@ -15,10 +14,38 @@ use Elasticsearch\Client as ElasticsearchClient;
  */
 class FeatureContext extends RESTContext implements Context, SnippetAcceptingContext
 {
-    public function __construct($url, $documentRoot, $router, $timeout) {
-        parent::__construct($url, $documentRoot, $router, $timeout);
+    public function __construct($url, $documentRoot, $router, $httpdLog, $timeout) {
+        parent::__construct($url, $documentRoot, $router, $httpdLog, $timeout);
 
         $this->elasticsearch = new ElasticsearchClient();
+    }
+
+    /**
+     * @BeforeScenario
+     * @AfterSuite
+     */
+    public static function cleanup() {
+        // Drop mongo test databases
+        $mongo = new MongoClient();
+        $mongo->metadatasearch_integration_db->drop();
+        $mongo->metadatasearch_integration_storage->drop();
+
+        // Delete the elasticsearch metadata test index
+        $elasticsearch = new ElasticsearchClient();
+
+        try {
+            $elasticsearch->indices()->delete([
+                'index' => 'metadatasearch_integration-*'
+            ]);
+        } catch (Exception $e) {
+            // We'll get a 404 if the index is non-existant - ignore it
+            if ($e->getCode() === 404) {
+                return;
+            }
+
+            // If this was something other than a 404 it's more interesting
+            throw $e;
+        }
     }
 
     /**
@@ -29,6 +56,13 @@ class FeatureContext extends RESTContext implements Context, SnippetAcceptingCon
         foreach ($images as $image) {
             $this->addImageToImbo($image['file'], json_decode($image['metadata'], true));
         }
+    }
+
+    /**
+     * @Given I have flushed the elasticsearch transaction log
+     */
+    public function flushElasticsearch() {
+        $this->elasticsearch->indices()->flush();
     }
 
     /**
@@ -73,7 +107,7 @@ class FeatureContext extends RESTContext implements Context, SnippetAcceptingCon
         $publicKey = 'publickey';
 
         $params = [
-            'index' => 'metadata-' . $publicKey,
+            'index' => 'metadatasearch_integration-' . $publicKey,
             'type' => 'metadata',
             'id' => $imageIdentifer
         ];
@@ -95,7 +129,7 @@ class FeatureContext extends RESTContext implements Context, SnippetAcceptingCon
         $publicKey = 'publickey';
 
         $params = [
-            'index' => 'metadata-' . $publicKey,
+            'index' => 'metadatasearch_integration-' . $publicKey,
             'type' => 'metadata',
             'id' => $imageIdentifer
         ];
@@ -108,7 +142,7 @@ class FeatureContext extends RESTContext implements Context, SnippetAcceptingCon
             return;
         }
 
-        throw \Exception('Image metadata found for image ' . $imageIdentifer . ' in ES');
+        throw new \Exception('Image metadata found for image ' . $imageIdentifer . ' in ES');
     }
 
     /**
@@ -141,17 +175,20 @@ class FeatureContext extends RESTContext implements Context, SnippetAcceptingCon
         // Build list of expected values
         $expectedIdentifiers = array_filter(explode(',', $imageIdentifers));
 
-        // Sort the expected identifiers
-        sort($expectedIdentifiers);
-
         $actualIdentifiers = array_map(function($image) {
             return $image['imageIdentifier'];
         }, $responseBody['images']);
 
-        // Sort the actual identifiers
-        sort($actualIdentifiers);
+        try {
+            Assertion::eq($expectedIdentifiers, $actualIdentifiers);
+        } catch (\Exception $e) {
+            print_r([
+                'expected' => $expectedIdentifiers,
+                'actual' => $actualIdentifiers
+            ]);
 
-        Assertion::eq($expectedIdentifiers, $actualIdentifiers);
+            throw $e;
+        }
     }
 
     /**
