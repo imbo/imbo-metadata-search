@@ -68,6 +68,28 @@ class MetadataOperations implements ListenerInterface {
     }
 
     /**
+     * Sorts the images in a response model given a correct order defined by
+     * the order of the imageIdentifiers in the second argument
+     *
+     * @param $responseModel Response containing the images
+     * @param string[] List of identifiers as returned from backend
+     * @return void
+     */
+    public function sortSearchResponse($responseModel, $identifiers) {
+        $images = $responseModel->getImages();
+
+        $result = [];
+        foreach ($images as $image) {
+           $key = array_search($image->getImageIdentifier(), $identifiers);
+           $result[$key] = $image;
+        }
+
+        ksort($result);
+
+        $responseModel->setImages($result);
+    }
+
+    /**
      * Update image data
      *
      * @param Imbo\EventListener\ListenerInterface $event The current event
@@ -190,8 +212,10 @@ class MetadataOperations implements ListenerInterface {
             return;
         }
 
+        $imageIdentifiers = $backendResponse->getImageIdentifiers();
+
         // Set the ids to fetch from the Imbo backend
-        $params->set('ids', $backendResponse->getImageIdentifiers());
+        $params->set('ids', $imageIdentifiers);
 
         // In order to paginate the already paginated resultset, we'll
         // set the page param to 0 before triggering db.images.load
@@ -204,5 +228,9 @@ class MetadataOperations implements ListenerInterface {
         // Set the actual page used for querying search backend on the response
         $responseModel->setPage($queryParams['page']);
         $responseModel->setHits($backendResponse->getHits());
+
+        // Sort the response image so they match the order of identifiers
+        // returned from search backend
+        $this->sortSearchResponse($responseModel, $imageIdentifiers);
     }
 }
