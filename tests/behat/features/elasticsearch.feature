@@ -56,7 +56,20 @@ Feature: Use elasticsearch as search backend for the metadata search pluin
         | metadata                       | page | limit | imageIdentifers                                                   | hits |
         | {"animal":"Snake"}             | 1    | 20    |                                                                   | 0    |
         | {"animal":"Hedgehog"}          | 1    | 20    | ce3e8c3de4b67e8af5315be82ec36692                                  | 1    |
-        | {"color":"red"}                | 1    | 20    | 574e32fb252f3c157c9b31babb0868c2,d3712bb23cf4e191e65cf938d55e8982 | 2    |
+        | {"color":"red"}                | 1    | 20    | d3712bb23cf4e191e65cf938d55e8982,574e32fb252f3c157c9b31babb0868c2 | 2    |
         | {"color":"red"}                | 1    | 1     | d3712bb23cf4e191e65cf938d55e8982                                  | 2    |
         | {"color":"red"}                | 2    | 1     | 574e32fb252f3c157c9b31babb0868c2                                  | 2    |
         | {"animal":"Cat","color":"red"} | 1    | 20    | d3712bb23cf4e191e65cf938d55e8982                                  | 1    |
+
+    Scenario Outline: Search and sort the search result
+        Given I include an access token in the query
+        And I sort by <sort>
+        When I search for images using {"color":"red"}
+        Then I should get a response with "200 OK"
+        And I should get the <imageIdentifiers> in the image response list
+
+        Examples:
+        | sort                           | imageIdentifiers                                                  |
+        | {"size":"asc"}                 | d3712bb23cf4e191e65cf938d55e8982,574e32fb252f3c157c9b31babb0868c2 |
+        | {"size":"desc"}                | 574e32fb252f3c157c9b31babb0868c2,d3712bb23cf4e191e65cf938d55e8982 |
+        | {"width":"desc","size":"desc"} | d3712bb23cf4e191e65cf938d55e8982,574e32fb252f3c157c9b31babb0868c2 |

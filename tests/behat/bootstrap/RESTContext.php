@@ -259,4 +259,19 @@ class RESTContext implements Context
     {
         $this->queryParams[$param] = $value;
     }
+
+    /**
+     * @Given /^I sort by (.*)$/
+     */
+    public function setSortParam($sortParams) {
+        $sortParams = json_decode($sortParams, true);
+
+        $sortArray = [];
+
+        foreach ($sortParams as $key => $dir) {
+            $sortArray[] = sprintf('%s:%s', $key, $dir);
+        }
+
+        $this->iSetTheQueryParamTo('sort', $sortArray);
+    }
 }

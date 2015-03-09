@@ -69,10 +69,14 @@ class ElasticSearch implements SearchBackendInterface {
         // Transform AST to ES query
         $query = $astTransformer->transform($ast);
 
+        // Get sort array
+        $sort = isset($queryParams['sort']) ? $queryParams['sort'] : [];
+
         $params = $this->prepareParams(
             $publicKey,
             null,
-            $query
+            $query,
+            $sort
         );
 
         $params['from'] = ($queryParams['page'] - 1) * $queryParams['limit'];
@@ -96,10 +100,11 @@ class ElasticSearch implements SearchBackendInterface {
      * @param array $metadata
      * @return array
      */
-    protected function prepareParams($publicKey, $imageIdentifier = null, $body = null) {
+    protected function prepareParams($publicKey, $imageIdentifier = null, $body = null, $sort = []) {
         $params = [
             'index' => $this->getIndexName($publicKey),
-            'type' => 'metadata'
+            'type' => 'metadata',
+            'body' => []
         ];
 
         if ($imageIdentifier !== null) {
@@ -107,7 +112,11 @@ class ElasticSearch implements SearchBackendInterface {
         }
 
         if ($body !== null) {
-            $params['body'] = $body;
+            $params['body'] = array_merge($params['body'], $body);
+        }
+
+        if ($sort) {
+            $params['body']['sort'] = $sort;
         }
 
         return $params;

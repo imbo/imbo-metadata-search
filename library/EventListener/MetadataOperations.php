@@ -68,6 +68,64 @@ class MetadataOperations implements ListenerInterface {
     }
 
     /**
+     * Sorts the images in a response model given a correct order defined by
+     * the order of the imageIdentifiers in the second argument
+     *
+     * @param $responseModel Response containing the images
+     * @param string[] List of identifiers as returned from backend
+     * @return void
+     */
+    public function sortSearchResponse($responseModel, $identifiers) {
+        $images = $responseModel->getImages();
+
+        $result = [];
+        foreach ($images as $image) {
+           $key = array_search($image->getImageIdentifier(), $identifiers);
+           $result[$key] = $image;
+        }
+
+        ksort($result);
+
+        $responseModel->setImages($result);
+    }
+
+    /**
+     * Get sort params from request
+     *
+     * @param Imbo\EventListener\ListenerInterface $event The current event
+     * @return array
+     */
+    public function getSortParams(EventInterface $event) {
+        $params = $event->getRequest()->query;
+
+        // Get sort param from query
+        $sortParams = $params->get('sort', []);
+
+        // Split and sanitize sort params
+        $sortParams = array_map(function($param) {
+            $paramValues = explode(':', $param);
+
+            if (!$paramValues[0]) {
+                return false;
+            }
+
+            $key = $paramValues[0];
+            $dir = isset($paramValues[1]) ? $paramValues[1] : 'asc';
+
+            if (!in_array($dir, ['asc', 'desc'])) {
+                $dir = 'asc';
+            }
+
+            return [$key => $dir];
+        }, $sortParams);
+
+        // Filter empty keys
+        $sortParams = array_filter($sortParams);
+
+        return $sortParams;
+    }
+
+    /**
      * Update image data
      *
      * @param Imbo\EventListener\ListenerInterface $event The current event
@@ -156,6 +214,7 @@ class MetadataOperations implements ListenerInterface {
             'limit' => $params->get('limit', 20),
             'from' => $params->get('from'),
             'to' => $params->get('to'),
+            'sort' => $this->getSortParams($event),
         ];
 
         if ($queryParams['page'] < 1) {
@@ -190,8 +249,10 @@ class MetadataOperations implements ListenerInterface {
             return;
         }
 
+        $imageIdentifiers = $backendResponse->getImageIdentifiers();
+
         // Set the ids to fetch from the Imbo backend
-        $params->set('ids', $backendResponse->getImageIdentifiers());
+        $params->set('ids', $imageIdentifiers);
 
         // In order to paginate the already paginated resultset, we'll
         // set the page param to 0 before triggering db.images.load
@@ -204,5 +265,9 @@ class MetadataOperations implements ListenerInterface {
         // Set the actual page used for querying search backend on the response
         $responseModel->setPage($queryParams['page']);
         $responseModel->setHits($backendResponse->getHits());
+
+        // Sort the response image so they match the order of identifiers
+        // returned from search backend
+        $this->sortSearchResponse($responseModel, $imageIdentifiers);
     }
 }
