@@ -33,8 +33,8 @@ class ElasticSearch implements SearchBackendInterface {
     /**
      * {@inheritdoc}
      */
-    public function set($publicKey, $imageIdentifier, array $metadata) {
-        $params = $this->prepareParams($publicKey, $imageIdentifier, $metadata);
+    public function set($publicKey, $imageIdentifier, array $imageData) {
+        $params = $this->prepareParams($publicKey, $imageIdentifier, $imageData);
 
         try {
             return !!$this->client->index($params);
