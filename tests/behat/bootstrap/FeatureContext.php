@@ -115,10 +115,10 @@ class FeatureContext extends RESTContext implements Context, SnippetAcceptingCon
         $retDoc = $this->elasticsearch->get($params);
 
         if ($metadata && !$retDoc) {
-            throw new \Exception('Image metadata for ' . $imageIdentifer . ' not found in ES');
+            throw new \Exception('Image ' . $imageIdentifer . ' not found in ES');
         }
 
-        Assertion::eq(json_encode($retDoc['_source']), (string) $metadata);
+        Assertion::eq(json_encode($retDoc['_source']['metadata']), (string) $metadata);
     }
 
     /**
@@ -126,23 +126,10 @@ class FeatureContext extends RESTContext implements Context, SnippetAcceptingCon
      */
     public function elasticsearchShouldNotHaveMetadataFor($imageIdentifer)
     {
-        $publicKey = 'publickey';
-
-        $params = [
-            'index' => 'metadatasearch_integration-' . $publicKey,
-            'type' => 'metadata',
-            'id' => $imageIdentifer
-        ];
-
-        try {
-            $this->elasticsearch->get($params);
-        } catch (\Exception $e) {
-            Assertion::eq(404, $e->getCode());
-
-            return;
-        }
-
-        throw new \Exception('Image metadata found for image ' . $imageIdentifer . ' in ES');
+        $this->elasticsearchShouldHaveTheFollowingMetadataFor(
+            $imageIdentifer,
+            new PyStringNode(['[]'], null)
+        );
     }
 
     /**

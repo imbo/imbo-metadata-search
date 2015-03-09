@@ -9,14 +9,14 @@ namespace Imbo\MetadataSearch\Interfaces;
  */
 interface SearchBackendInterface {
     /**
-     * Set metadata for an image in the metadata search backend
+     * Set data for an image in the search backend
      *
      * @param string $publicKey Public key the image belongs to
      * @param string $imageIdentifier Image identifier
-     * @param array $metadata Metadata array containing key value pairs
+     * @param array $imageData Image data array containing key value pairs
      * @return bool
      */
-    public function set($publicKey, $imageIdentifier, array $metadata);
+    public function set($publicKey, $imageIdentifier, array $imageData);
 
     /**
      * Delete metadata for an image in the metadata search backend

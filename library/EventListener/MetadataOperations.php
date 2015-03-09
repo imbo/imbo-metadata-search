@@ -8,7 +8,8 @@ use Imbo\EventListener\ListenerInterface,
     Imbo\MetadataSearch\Interfaces\SearchBackendInterface,
     Imbo\MetadataSearch\Dsl\Parser as DslParser,
     Imbo\Exception\RuntimeException,
-    Imbo\Model\Images as ImagesModel;
+    Imbo\Model\Images as ImagesModel,
+    Imbo\Model\Image as ImageModel;
 
 /**
  * Metadata event listener
@@ -35,34 +36,82 @@ class MetadataOperations implements ListenerInterface {
 
     public static function getSubscribedEvents() {
         return [
-            'metadata.post'   => ['set' => -1000],
-            'metadata.put'    => ['set' => -1000],
-            'metadata.delete' => ['delete' => -1000],
+            'image.delete' => ['delete' => -1000],
+            'images.post' => ['set' => -1000],
+            'image.post' => ['set' => -1000],
+            'metadata.post' => ['set' => -1000],
+            'metadata.put' => ['set' => -1000],
+            'metadata.delete' => ['set' => -1000],
             'metadata.search' => 'search',
         ];
     }
 
+    public function getImageData($event, $imageIdentifier) {
+        $image = new ImageModel();
+
+        $event->getDatabase()->load(
+            $event->getRequest()->getPublicKey(),
+            $imageIdentifier,
+            $image
+        );
+
+        // Get image metadata
+        $metadata = $event->getDatabase()->getMetadata(
+            $event->getRequest()->getPublicKey(),
+            $imageIdentifier
+        );
+
+        // Set image metadata on the image model
+        $image->setMetadata($metadata);
+
+        return $image;
+    }
+
     /**
-     * Update metadata for an image
+     * Update image data
      *
      * @param Imbo\EventListener\ListenerInterface $event The current event
      */
     public function set(EventInterface $event) {
         $request = $event->getRequest();
+        $response = $event->getResponse();
 
-        // Get the metadata set by imbo
-        $metadata = $event->getResponse()->getModel();
+        $imageIdentifier = $request->getImageIdentifier();
 
-        // Trigger update of metadata in search backend
+        // The imageIdentifier was not part of the URL
+        if (!$imageIdentifier) {
+            $responseData = $response->getModel()->getData();
+
+            if (!isset($responseData['imageIdentifier'])) {
+                return;
+            }
+
+            $imageIdentifier = $responseData['imageIdentifier'];
+        }
+
+        // Get image information
+        $image = $this->getImageData($event, $imageIdentifier);
+
+        // Pass image data to the search backend
         $this->backend->set(
             $request->getPublicKey(),
-            $request->getImageIdentifier(),
-            $metadata->getData()
+            $imageIdentifier,
+            [
+                'publicKey' => $request->getPublicKey(),
+                'size' => $image->getFilesize(),
+                'extension' => $image->getExtension(),
+                'mime' => $image->getMimeType(),
+                'metadata' => $image->getMetadata(),
+                'added' => $image->getAddedDate()->getTimestamp(),
+                'updated' => $image->getUpdatedDate()->getTimestamp(),
+                'width' => $image->getWidth(),
+                'height' => $image->getHeight(),
+            ]
         );
     }
 
     /**
-     * Remove metadata (DELETE) handler
+     * Remove image information (DELETE) handler
      *
      * @param Imbo\EventListener\ListenerInterface $event The current event
      */
