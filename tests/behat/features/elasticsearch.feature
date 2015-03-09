@@ -72,5 +72,4 @@ Feature: Use elasticsearch as search backend for the metadata search pluin
         | sort                           | imageIdentifiers                                                  |
         | {"size":"asc"}                 | d3712bb23cf4e191e65cf938d55e8982,574e32fb252f3c157c9b31babb0868c2 |
         | {"size":"desc"}                | 574e32fb252f3c157c9b31babb0868c2,d3712bb23cf4e191e65cf938d55e8982 |
-        | {"size":"desc"}                | 574e32fb252f3c157c9b31babb0868c2,d3712bb23cf4e191e65cf938d55e8982 |
         | {"width":"desc","size":"desc"} | d3712bb23cf4e191e65cf938d55e8982,574e32fb252f3c157c9b31babb0868c2 |
