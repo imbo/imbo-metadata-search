@@ -90,6 +90,42 @@ class MetadataOperations implements ListenerInterface {
     }
 
     /**
+     * Get sort params from request
+     *
+     * @param Imbo\EventListener\ListenerInterface $event The current event
+     * @return array
+     */
+    public function getSortParams(EventInterface $event) {
+        $params = $event->getRequest()->query;
+
+        // Get sort param from query
+        $sortParams = $params->get('sort', []);
+
+        // Split and sanitize sort params
+        $sortParams = array_map(function($param) {
+            $paramValues = explode(':', $param);
+
+            if (!$paramValues[0]) {
+                return false;
+            }
+
+            $key = $paramValues[0];
+            $dir = isset($paramValues[1]) ? $paramValues[1] : 'asc';
+
+            if (!in_array($dir, ['asc', 'desc'])) {
+                $dir = 'asc';
+            }
+
+            return [$key => $dir];
+        }, $sortParams);
+
+        // Filter empty keys
+        $sortParams = array_filter($sortParams);
+
+        return $sortParams;
+    }
+
+    /**
      * Update image data
      *
      * @param Imbo\EventListener\ListenerInterface $event The current event
@@ -178,6 +214,7 @@ class MetadataOperations implements ListenerInterface {
             'limit' => $params->get('limit', 20),
             'from' => $params->get('from'),
             'to' => $params->get('to'),
+            'sort' => $this->getSortParams($event),
         ];
 
         if ($queryParams['page'] < 1) {
