@@ -59,7 +59,7 @@ class ElasticSearchDsl implements DslTransformationInterface {
                 // We have a field, so let's look at the type of comparison we
                 // are making, to determine how to transform it into a ES-php
                 // DSL query
-                $field = $query->field();
+                $field = 'metadata.' . $query->field();
                 $comparison = $query->comparison();
 
                 switch (true) {
