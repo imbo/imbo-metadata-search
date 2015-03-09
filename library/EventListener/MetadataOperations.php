@@ -111,7 +111,7 @@ class MetadataOperations implements ListenerInterface {
     }
 
     /**
-     * Remove metadata (DELETE) handler
+     * Remove image information (DELETE) handler
      *
      * @param Imbo\EventListener\ListenerInterface $event The current event
      */
