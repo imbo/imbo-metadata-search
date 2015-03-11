@@ -1,4 +1,4 @@
-# imbo-metadata-search
+# Metadata search plugin for Imbo
 The metadata search event listener hooks onto metadata updates for your images and keeps the search backend of your choice up to date, and allows you to find images by querying its metadata.
 
 [![Current build Status](https://secure.travis-ci.org/imbo/imbo-metadata-search.png)](http://travis-ci.org/imbo/imbo-metadata-search)
