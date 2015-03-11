@@ -8,6 +8,8 @@ use Imbo\MetadataSearch\Interfaces\DslAstComparisonInterface AS AstComparison;
  * An abstract base-comparison that just stores a value. The point of the
  * comparisons is simply to have different concrete class-names to match against
  * - not to store the value differenty.
+ *
+ * @author Morten Fangel <fangel@sevengoslings.net>
  */
 abstract class Base implements AstComparison {
     /**

@@ -8,6 +8,8 @@ use Imbo\MetadataSearch\Interfaces\DslAstInterface as AstNode,
 /**
  * A criteria on a fields value. Represents the name of the field and a
  * comparison against a value.
+ *
+ * @author Morten Fangel <fangel@sevengoslings.net>
  */
 class Field implements AstNode {
     /**

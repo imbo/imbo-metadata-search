@@ -7,5 +7,7 @@ use Imbo\MetadataSearch\Interfaces\DslAstComparisonInterface AS AstComparison,
 
 /**
  * A comparison for in-set against the stored value
+ *
+ * @author Morten Fangel <fangel@sevengoslings.net>
  */
 class In extends Base implements AstComparison {}

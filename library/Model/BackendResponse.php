@@ -6,6 +6,8 @@ use Imbo\Model\ModelInterface;
 
 /**
  * Search backend response wrapper
+ *
+ * @author Kristoffer Brabrand <kristoffer@brabrand.no>
  */
 class BackendResponse implements ModelInterface {
     /**

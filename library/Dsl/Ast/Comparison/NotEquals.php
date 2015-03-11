@@ -7,5 +7,7 @@ use Imbo\MetadataSearch\Interfaces\DslAstComparisonInterface AS AstComparison,
 
 /**
  * A comparison against equality with the stored value
+ *
+ * @author Morten Fangel <fangel@sevengoslings.net>
  */
 class NotEquals extends Base implements AstComparison {}

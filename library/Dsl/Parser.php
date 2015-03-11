@@ -15,6 +15,11 @@ use Imbo\Exception\InvalidArgumentException,
     Imbo\MetadataSearch\Dsl\Ast\Comparison\GreaterThan,
     Imbo\MetadataSearch\Dsl\Ast\Comparison\GreaterThanEquals;
 
+/**
+ * Imbo DSL parser
+ *
+ * @author Morten Fangel <fangel@sevengoslings.net>
+ */
 class Parser {
     /**
      * Valid expressions for metadata queries
