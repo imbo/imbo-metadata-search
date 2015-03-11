@@ -32,43 +32,77 @@ In order for the metadata search plugin to be registered and actually do somethi
 
 After installing with composer you will find a basic config file for the metadata search in `vendor/imbo/imbo-metadata-search/config.dist.php`. If you want to make changes to the file you should copy it to your config folder.
 
-## Usage
-```js
-GET /search.json?q={"animal":"dog"}
+## Indexing
+Updates in the search backend is triggered whenever one of the following events are fired; `image.delete`, `images.post`, `image.post`, `metadata.post`, `metadata.put`, `metadata.delete`.
+
+The `image.delete` event triggers a delete in the indexed object in the search backend, and the other ones trigger an update of the full object. When indexing, data in addition to metadata is provided to the search backend for indexin in order to sorting and such.
+
+The data provided to the backend are;
+
+| Data        | Description           |
+| ------------- |:-------------|
+| `publicKey` | The publickey "owning" the image |
+| `size` | Byte size of image. |
+| `extension` | File extension. |
+| `mime` | Mime type of file. |
+| `metadata` | Image metadata. |
+| `added` | Timestamp representation of when the image was added. |
+| `updated` | Timestamp representation of when the image was last updated. |
+| `width` | Width of image in pixels. |
+| `height` | Height of image in pixels. |
+
+## Querying
+The metadata search is queried by requesting the `/users/<publickey>/search` resource using HTTP GET. Supported query parameters are:
+
+| Param | Description |
+| ----- | ----------- |
+| `q` | Metadata query (Imbo DSL) represented as JSON string |
+| `page` | The page number. Defaults to 1. |
+| `limit` | Number of images per page. Defaults to 20. |
+| `metadata` | Whether or not to include metadata in the output. Defaults to 0, set to 1 to enable. |
+| `fields[]` | An array with fields to display. When not specified all fields will be displayed. |
+| `sort[]` | An array with fields to sort by. The direction of the sort is specified by appending asc or desc to the field, delimited by :. If no direction is specified asc will be used. Example: ?sort[]=size&sort[]=width:desc is the same as ?sort[]=size:asc&sort[]=width:desc. If no sort is specified the search backend will rank by relevance. |
+
+```sh
+$ curl 'http://imbo/users/<user>/search.json?q={"foo:bar"}&limit=1&metadata=1'
+```
+
+Results in:
+
+```json
 {
-    search: {
-        hits: 2,
-        page: 1,
-        limit: 20,
-        count: 0
-    },
-    images: [
-        {
-            added: "Tue, 03 Mar 2015 09:15:31 GMT",
-            updated: "Thu, 05 Mar 2015 12:21:51 GMT",
-            checksum: "3012ee0319a7f752ac615d8d86b63894",
-            originalChecksum: "3012ee0319a7f752ac615d8d86b63894",
-            extension: "jpg",
-            size: 68012,
-            width: 800,
-            height: 600,
-            mime: "image/jpeg",
-            imageIdentifier: "3012ee0319a7f752ac615d8d86b63894",
-            publicKey: "publickey"
-        },
-        {
-            added: "Tue, 03 Mar 2015 09:15:31 GMT",
-            updated: "Wed, 04 Mar 2015 12:42:27 GMT",
-            checksum: "ce3e8c3de4b67e8af5315be82ec36692",
-            originalChecksum: "ce3e8c3de4b67e8af5315be82ec36692",
-            extension: "jpg",
-            size: 63602,
-            width: 640,
-            height: 425,
-            mime: "image/jpeg",
-            imageIdentifier: "ce3e8c3de4b67e8af5315be82ec36692",
-            publicKey: "publickey"
-        }
-    ]
+  "search": {
+    "hits": 3,
+    "page": 1,
+    "limit": 1,
+    "count": 1
+  },
+  "images": [
+    {
+      "added": "Mon, 10 Dec 2012 11:57:51 GMT",
+      "updated": "Mon, 10 Dec 2012 11:57:51 GMT",
+      "checksum": "<checksum>",
+      "originalChecksum": "<originalChecksum>",
+      "extension": "png",
+      "size": 6791,
+      "width": 1306,
+      "height": 77,
+      "mime": "image/png",
+      "imageIdentifier": "<image>",
+      "publicKey": "<user>",
+      "metadata": {
+        "key": "value",
+        "foo": "bar"
+      }
+    }
+  ]
 }
 ```
+
+## Imbo DSL
+Description of the Imbo DSL goes here.
+
+# License
+Copyright (c) 2015, [Kristoffer Brabrand](mailto:kristoffer@brabrand.no) and [Morten Fangel](mailto:fangel@sevengoslings.net)
+
+Licensed under the MIT License
