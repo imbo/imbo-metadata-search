@@ -187,4 +187,33 @@ class FeatureContext extends RESTContext implements Context, SnippetAcceptingCon
 
         Assertion::eq($body['search']['hits'], $hits);
     }
+
+    /**
+     * @When /^I search for images using (.*?)$/
+     */
+    public function iSearchForImagesUsing($metadata)
+    {
+        $params = array_merge($this->queryParams, ['q' => $metadata]);
+
+        try {
+            $this->rawRequest('/users/publickey/search.json', 'GET', $params);
+        } catch (Exception $e) {
+            // We'll assert the status and such later, if we're interested
+        }
+    }
+
+    /**
+     * @Given /^I sort by (.*)$/
+     */
+    public function setSortParam($sortParams) {
+        $sortParams = json_decode($sortParams, true);
+
+        $sortArray = [];
+
+        foreach ($sortParams as $key => $dir) {
+            $sortArray[] = sprintf('%s:%s', $key, $dir);
+        }
+
+        $this->iSetTheQueryParamTo('sort', $sortArray);
+    }
 }
