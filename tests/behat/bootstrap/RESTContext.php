@@ -203,7 +203,7 @@ class RESTContext implements Context
         $params = array_merge($this->queryParams, ['q' => $metadata]);
 
         try {
-            $this->rawRequest('/publickey/search.json', 'GET', $params);
+            $this->rawRequest('/users/publickey/search.json', 'GET', $params);
         } catch (Exception $e) {
             // We'll assert the status and such later, if we're interested
         }
