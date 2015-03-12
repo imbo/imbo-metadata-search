@@ -8,5 +8,7 @@ use Imbo\MetadataSearch\Interfaces\DslAstInterface as AstNode,
 /**
  * A conjunction (logical AND) node for our AST. Used to represent a list
  * of AST terms that must all hold in the query.
+ *
+ * @author Morten Fangel <fangel@sevengoslings.net>
  */
 class Conjunction extends ArrayObject implements AstNode  {}

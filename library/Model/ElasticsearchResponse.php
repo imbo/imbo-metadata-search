@@ -4,6 +4,8 @@ namespace Imbo\MetadataSearch\Model;
 
 /**
  * Elasticsearch backend search response
+ *
+ * @author Kristoffer Brabrand <kristoffer@brabrand.no>
  */
 class ElasticsearchResponse extends BackendResponse {
     /**

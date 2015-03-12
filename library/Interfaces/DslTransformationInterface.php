@@ -8,6 +8,8 @@ use Imbo\MetadataSearch\Interfaces\DslAstInterface AS AstNode;
  * Interface for DSL transformation classes. A transformation class is
  * responsible for taking an instance of our query-DSL and transforming it into
  * a query that a certain backend can understand.
+ *
+ * @author Morten Fangel <fangel@sevengoslings.net>
  */
 interface DslTransformationInterface {
     /**

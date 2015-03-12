@@ -18,6 +18,8 @@ use Imbo\MetadataSearch\Interfaces\DslTransformationInterface,
 
 /**
  * A transformation from our query-DSL into the ElasticSearch-php query-DSL.
+ *
+ * @author Morten Fangel <fangel@sevengoslings.net>
  */
 class ElasticSearchDsl implements DslTransformationInterface {
     /**

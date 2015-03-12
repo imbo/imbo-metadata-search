@@ -7,5 +7,7 @@ use Imbo\MetadataSearch\Interfaces\DslAstComparisonInterface AS AstComparison,
 
 /**
  * A comparison for greater-than against the stored value
+ *
+ * @author Morten Fangel <fangel@sevengoslings.net>
  */
 class GreaterThan extends Base implements AstComparison {}

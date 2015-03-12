@@ -6,6 +6,11 @@ use Imbo\EventManager\EventInterface,
     Imbo\Resource\ResourceInterface,
     Imbo\Model;
 
+/**
+ * Search resource
+ *
+ * @author Kristoffer Brabrand <kristoffer@brabrand.no>
+ */
 class Search implements ResourceInterface {
     /**
      * {@inheritdoc}

@@ -195,20 +195,6 @@ class RESTContext implements Context
         return true;
     }
 
-    /**
-     * @When /^I search for images using (.*?)$/
-     */
-    public function iSearchForImagesUsing($metadata)
-    {
-        $params = array_merge($this->queryParams, ['q' => $metadata]);
-
-        try {
-            $this->rawRequest('/publickey/search.json', 'GET', $params);
-        } catch (Exception $e) {
-            // We'll assert the status and such later, if we're interested
-        }
-    }
-
     public function rawRequest($path, $method = 'GET', $params = []) {
         if (empty($this->requestHeaders['Accept'])) {
             $this->requestHeaders['Accept'] = 'application/json';
@@ -258,20 +244,5 @@ class RESTContext implements Context
     public function iSetTheQueryParamTo($param, $value)
     {
         $this->queryParams[$param] = $value;
-    }
-
-    /**
-     * @Given /^I sort by (.*)$/
-     */
-    public function setSortParam($sortParams) {
-        $sortParams = json_decode($sortParams, true);
-
-        $sortArray = [];
-
-        foreach ($sortParams as $key => $dir) {
-            $sortArray[] = sprintf('%s:%s', $key, $dir);
-        }
-
-        $this->iSetTheQueryParamTo('sort', $sortArray);
     }
 }
