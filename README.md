@@ -4,7 +4,7 @@ The metadata search event listener hooks onto metadata updates for your images a
 [![Current build Status](https://secure.travis-ci.org/imbo/imbo-metadata-search.png)](http://travis-ci.org/imbo/imbo-metadata-search)
 
 ## Installation
-### Setting up the depenencies
+### Setting up the dependencies
 If you've installed Imbo through composer, getting the metadata search up and running is really simple. Simply add `imbo/imbo-metadata-search` as a dependency. 
 
 In addition to the metadata search plugin you'll need a search backend client. Right now the plugin ships with support for elasticsearch only, so you'll want to add `elasticsearch/elasticsearch` as well in order to be able to use it as search backend.
