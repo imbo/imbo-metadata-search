@@ -100,7 +100,170 @@ Results in:
 ```
 
 ## Imbo DSL
-Description of the Imbo DSL goes here.
+
+The query language used by Imbo Metadata Search is a subset of the MongoDB query
+DSL. The query is a JSON-encoded object including ``key => value`` matches
+and/or a combination of the supported operators, sent to Imbo in the ``q`` query
+parameter. This section lists all operators and includes a number of examples
+showing you how to find images using the metadata query.
+
+**Note**: The results of the different queries *might* end up with slightly
+different results depending on the backend you use the for metadata.
+
+#### Key/value matching
+
+The simplest form of a metadata query is a simple `key => value` match, where
+the expressions are AND-ed together if there is more than one key/value match in
+the query.
+
+```js
+ {"key":"value","otherkey":"othervalue"}
+```
+
+The above search would result in images that have the metadata key `key` set to
+`value` **and** `otherkey` set to `othervalue`
+
+#### Greater than - `$gt`
+
+This operator can be used to check for values greater than the value specified.
+
+```js
+{"age":{"$gt":35}}
+```
+
+#### Greater than or equal - `$gte`
+
+Check for values greater than or equal to the value specified.
+
+```js
+ {"age":{"$gte":35}}
+```
+
+#### Less than - `$lte`
+
+Check for values less than to the value specified.
+
+```js
+{"age":{"$lt":35}}
+```
+
+#### Less than or equal - `$lte`
+
+Check for values less than or equal to the value specified.
+
+```js
+{"age":{"$lte":35}}
+```
+
+#### Not equal - `$ne`
+
+Matches values that are not equal to the value specified.
+
+```js
+{"name":{"$ne":"christer"}}
+```
+
+#### In - `$in`
+
+Look for values that appear in the specified set.
+
+```js
+{"styles":{"$in":["IPA","Imperial Stout","Lambic"]}}
+```
+
+#### Not in - `$nin`
+
+Look for values that does not appear in the specified set.
+
+```js
+{"styles":{"$nin":["Pilsner"]}}
+```
+
+#### Conjunctions - `$and`
+
+This operator can be used to combine a list of criteria that must all match. It
+takes an array of queries.
+
+```js
+{"$and": [{"name": {"$in": ["kristoffer", "morten"]}}, {"age": {"$lt": 30}}]}
+```
+
+Would find images where the key `name` is either `kristoffer` or `morten` and
+where the `age` key is less than `30`.
+
+#### Disjunction - `$or`
+
+This operator can be used to combine a list of criteria where at least one must
+match. It takes an array of queries.
+
+```js
+{"$or":[{"key":"value"},{"otherkey":"othervalue"}]}
+```
+
+Would fetch images that have a key named `key` with the value `value` and/or a
+key named `otherkey` which has the value of `othervalue`.
+
+#### Using several operators in one query
+
+All the above operators can be combined into one query. Consider a collection of
+images of beers which have all been tagged with the name of the brewery, the
+name of the beer, the style of the beer and the ABV. If we wanted to find all
+images of beers within a set of styles, above a specific ABV, from two different
+breweries, and all images of beers from Nøgne Ø, regardless of style and ABV,
+but not beers called Wit, regardless of brewery, style or ABV, the query could
+look like this (formatted for easier reading):
+
+```js
+{
+    "name":
+    {
+        "$ne": "Wit"
+    },
+    "$or":
+    [
+        {
+            "brewery": "Nøgne Ø"
+        },
+
+        {
+            "$and":
+            [
+                {
+                    "abv":
+                    {
+                        "$gte": 5.5
+                    }
+                },
+
+                {
+                    "style":
+                    {
+                        "$in":
+                        [
+                            "IPA",
+                            "Imperial Stout"
+                        ]
+                    }
+                },
+
+                {
+                    "brewery":
+                    {
+                        "$in":
+                        [
+                            "HaandBryggeriet",
+                            "Ægir"
+                        ]
+                    }
+                }
+            ]
+        }
+    ]
+}
+```
+
+Keep in mind that large complex queries against large image collections can take
+a while to finish, and might cause performance issues on the Imbo server(s).
 
 # License
 Copyright (c) 2015, [Kristoffer Brabrand](mailto:kristoffer@brabrand.no) and [Morten Fangel](mailto:fangel@sevengoslings.net)
