@@ -9,21 +9,12 @@ If you've installed Imbo through composer, getting the metadata search up and ru
 
 In addition to the metadata search plugin you'll need a search backend client. Right now the plugin ships with support for elasticsearch only, so you'll want to add `elasticsearch/elasticsearch` as well in order to be able to use it as search backend.
 
-At the time of writing, the `imbo-metadata-search` has not yet been published to [Packagist](http://packagist.com), so you'll need to add the github.com url as a repository in your `composer.json`.
-
 ```json
 {
     "require": {
-        "imbo/imbo": "~1.2",
         "imbo/imbo-metadata-search": "dev-master",
         "elasticsearch/elasticsearch": "~1.3"
-    },
-    "repositories": [
-        {
-            "type": "vcs",
-            "url": "https://github.com/imbo/imbo-metadata-search"
-        }
-    ]
+    }
 }
 ```
 
