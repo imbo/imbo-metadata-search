@@ -79,8 +79,19 @@ class ElasticSearch implements SearchBackendInterface {
             $sort
         );
 
-        $params['from'] = ($queryParams['page'] - 1) * $queryParams['limit'];
-        $params['size'] = $queryParams['limit'];
+        // Set page and limit
+        $params = $this->setPageAndLimit(
+            $params,
+            $queryParams['page'],
+            $queryParams['limit']
+        );
+
+        // Limit resultset by creation time
+        $params = $this->addDateRangeFilter(
+            $params,
+            $queryParams['from'],
+            $queryParams['to']
+        );
 
         try {
             $queryResult = $this->client->search($params);
@@ -90,6 +101,62 @@ class ElasticSearch implements SearchBackendInterface {
 
         // Create and return search response model
         return new ElasticsearchResponse($queryResult);
+    }
+
+    /**
+     * Add page and limit to params elasticsearch params array
+     *
+     * @param array $params Params array
+     * @param int $page
+     * @param int $limit
+     * @return array Modified params array
+     */
+    protected function setPageAndLimit(array $params, $page, $limit) {
+        $params['from'] = ($page - 1) * $limit;
+        $params['size'] = $limit;
+
+        return $params;
+    }
+
+    /**
+     * Add date range filter to params
+     *
+     * @param array $params Params array
+     * @param int $from Start of date range
+     * @param int $to End of date range
+     * @return array Modified params array
+     */
+    protected function addDateRangeFilter(array $params, $from = null, $to = null) {
+        if (!$from && !$to) {
+            return $params;
+        }
+
+        $rangeFilter = [];
+
+        if ($from) {
+            $rangeFilter['gte'] = $from;
+        }
+
+        if ($to) {
+            $rangeFilter['lte'] = $to;
+        }
+
+        $params['body'] = [
+            'query' => [
+                'filtered' => [
+                    'query' => [
+                        'match' => $params['body']['query']['match']
+                    ],
+                    'filter' => [
+                        'range' => [
+                            'added' => $rangeFilter
+                        ]
+                    ]
+                ]
+            ]
+        ];
+
+        return $params;
     }
 
     /**
