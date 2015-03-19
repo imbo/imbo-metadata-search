@@ -258,6 +258,10 @@ class MetadataOperations implements ListenerInterface {
         // set the page param to 0 before triggering db.images.load
         $params->set('page', 0);
 
+        // Unset date range parameters
+        $params->remove('to');
+        $params->remove('from');
+
         // Trigger image loading from imbo DB
         $event->getManager()->trigger('db.images.load');
         $responseModel = $event->getResponse()->getModel();
