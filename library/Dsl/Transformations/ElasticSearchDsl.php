@@ -31,14 +31,33 @@ class ElasticSearchDsl implements DslTransformationInterface {
     public function transform(AstNode $query) {
         $transformed = $this->_transform($query);
 
-        if (key($transformed) !== 'query') {
-            // If the outer-most comparison wasn't `query`, it means it was an
-            // and or an or, which can only be used in filters, so we ensure
-            // the query will be a filter...
-            $transformed = array('filter' => $transformed);
-        }
+        switch (key($transformed)) {
+            // A simple query was returned, use it for the query part
+            // of the filtered query and set an empty filter
+            case 'query':
+                return [
+                    'query' => [
+                        'filtered' => [
+                            'query' => $transformed['query'],
+                            'filter' => []
+                        ]
+                    ]
+                ];
 
-        return $transformed;
+            default:
+                // A filter was returned from _transform. Add it to the
+                // list of filters and set an empty query.
+                return [
+                    'query' => [
+                        'filtered' => [
+                            'query' => [],
+                            'filter' => [
+                                $transformed
+                            ]
+                        ]
+                    ]
+                ];
+        }
     }
 
     /**

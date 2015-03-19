@@ -131,30 +131,21 @@ class ElasticSearch implements SearchBackendInterface {
             return $params;
         }
 
-        $rangeFilter = [];
+        $rangeFilter = [
+            'range' => [
+                'added' => []
+            ]
+        ];
 
         if ($from) {
-            $rangeFilter['gte'] = $from;
+            $rangeFilter['range']['added']['gte'] = $from;
         }
 
         if ($to) {
-            $rangeFilter['lte'] = $to;
+            $rangeFilter['range']['added']['lte'] = $to;
         }
 
-        $params['body'] = [
-            'query' => [
-                'filtered' => [
-                    'query' => [
-                        'match' => $params['body']['query']['match']
-                    ],
-                    'filter' => [
-                        'range' => [
-                            'added' => $rangeFilter
-                        ]
-                    ]
-                ]
-            ]
-        ];
+        $params['body']['query']['filtered']['filter'][] = $rangeFilter;
 
         return $params;
     }
