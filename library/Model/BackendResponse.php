@@ -15,7 +15,7 @@ class BackendResponse implements ModelInterface {
      *
      * @var string[]
      */
-    private $imageIdentifiers = array();
+    private $imageIdentifiers = [];
 
     /**
      * Query hits

@@ -18,42 +18,42 @@ use Imbo\MetadataSearch\Dsl\Parser,
 
 class ParserTest extends \PHPUnit_Framework_TestCase {
     public function getValidDslQueries() {
-        return array(
-            'empty string' => array(
+        return [
+            'empty string' => [
                 'query' => '',
                 'expected' => new Conjunction([]),
-            ),
-            'minimal text' => array(
+            ],
+            'minimal text' => [
                 'query' => '{}',
                 'expected' => new Conjunction([]),
-            ),
-            'minimal associative array' => array(
+            ],
+            'minimal associative array' => [
                 'query' => [],
                 'expected' => new Conjunction([]),
-            ),
-            'already lowercased' => array(
-                'original' => array('foo' => 'bar'),
+            ],
+            'already lowercased' => [
+                'original' => ['foo' => 'bar'],
                 'expected' => new Field('foo', new Equals('bar')),
-            ),
-            'mixed case' => array(
-                'original' => array('Foo' => 'Bar'),
+            ],
+            'mixed case' => [
+                'original' => ['Foo' => 'Bar'],
                 'expected' => new Field('Foo', new Equals('Bar')),
-            ),
-            'implicit $and at the root, as string' => array(
+            ],
+            'implicit $and at the root, as string' => [
                 'original' => '{"foo": "bar", "baz": "blargh"}',
                 'expected' => new Conjunction([
                                   new Field('foo', new Equals('bar')),
                                   new Field('baz', new Equals('blargh'))
                               ]),
-            ),
-            'root as explicit $and, as string' => array(
+            ],
+            'root as explicit $and, as string' => [
                 'original' => '{"$and": [{"foo": "bar"}, {"baz": "blargh"}]}',
                 'expected' => new Conjunction([
                                   new Field('foo', new Equals('bar')),
                                   new Field('baz', new Equals('blargh'))
                               ]),
-            ),
-            'implicit $and inside an $or, as string' => array(
+            ],
+            'implicit $and inside an $or, as string' => [
                 'original' => '{"$or": [{"foo": "bar"}, {"bar": "baz", "baz": "blargh"}]}',
                 'expected' => new Disjunction([
                                   new Field('foo', new Equals('bar')),
@@ -62,26 +62,26 @@ class ParserTest extends \PHPUnit_Framework_TestCase {
                                       new Field('baz', new Equals('blargh'))
                                   ])
                               ]),
-            ),
-            'a single operator on a field' => array(
+            ],
+            'a single operator on a field' => [
                 'original' => '{"foo": {"$gt": 5}}',
                 'expected' => new Field('foo', new GreaterThan(5)),
-            ),
-            'multiple operators on a field' => array(
+            ],
+            'multiple operators on a field' => [
                 'original' => '{"foo": {"$gt": 5, "$lte": 15}}',
                 'expected' => new Conjunction([
                                   new Field('foo', new GreaterThan(5)),
                                   new Field('foo', new LessThanEquals(15)),
                               ])
-            ),
-            'in and not-in is accepted with arrays' => array(
+            ],
+            'in and not-in is accepted with arrays' => [
                 'original' => '{"$or": [{"field": {"$in": [1, 2, 3]}}, {"field": {"$nin": [5, 6 ,7]}}]}',
                 'expected' => new Disjunction([
                                   new Field('field', new In([1, 2, 3])),
                                   new Field('field', new NotIn([5, 6, 7])),
                               ])
-            ),
-            'a larger, more complex query' => array(
+            ],
+            'a larger, more complex query' => [
                 'original' => '{
                                 "name": { "$ne": "Wit" },
                                 "$or": [
@@ -104,57 +104,57 @@ class ParserTest extends \PHPUnit_Framework_TestCase {
                                       ]),
                                   ]),
                               ]),
-            ),
-        );
+            ],
+        ];
     }
 
     public function getInvalidDslQueries() {
-        return array(
-            'invalid json' => array(
+        return [
+            'invalid json' => [
                 'query' => 'not json',
                 'message' => 'Query must be valid JSON',
-            ),
-            'query is a string' => array(
+            ],
+            'query is a string' => [
                 'query' => '"a string"',
                 'message' => 'Query must be a JSON object or array',
-            ),
-            'query is a number' => array(
+            ],
+            'query is a number' => [
                 'query' => 3.1415,
                 'message' => 'Query must be a JSON object or array',
-            ),
-            'unsupported expression' => array(
+            ],
+            'unsupported expression' => [
                 'query' => '{"$nor": [{"foo": "bar"}, {"baz": "blargh"}]}',
                 'message' => 'Expressions of the type $nor not allowed. Only allowed expressions are: $or, $and',
-            ),
-            'using a operator as an expression' => array(
+            ],
+            'using a operator as an expression' => [
                 'query' => '{"$in": [1, 2, 3]}',
                 'message' => 'Expressions of the type $in not allowed. Only allowed expressions are: $or, $and',
-            ),
-            'using an operator that is not supported ($regex)' => array(
-                'query' => array('category' => array('$regex' => '(foo|bar|baz)')),
+            ],
+            'using an operator that is not supported ($regex)' => [
+                'query' => ['category' => ['$regex' => '(foo|bar|baz)']],
                 'message' => 'Operator of the type $regex not allowed',
-            ),
-            'specifying a non-array for a operator' => array(
+            ],
+            'specifying a non-array for a operator' => [
                 'query' => '{"$or": 3}',
                 'message' => 'Contents of the $or-expression is not an array',
-            ),
-            'not specifing an operator on a field' => array(
+            ],
+            'not specifing an operator on a field' => [
                 'query' => '{"category": []}',
                 'message' => 'No operations defined for the criteria on "category"',
-            ),
-            'performing a exact-embedded document search' => array(
+            ],
+            'performing a exact-embedded document search' => [
                 'query' => '{"category": {"foo": "bar", "baz": "blargh"}}',
                 'message' => 'Imbo does not support exact matches on embedded documents. Please use dot-syntax instead',
-            ),
-            'performing a less-than on an array' => array(
+            ],
+            'performing a less-than on an array' => [
                 'query' => '{"foo": {"$gt": [1, 2, 3]}}',
                 'message' => 'The operator $gt must not be called with an array',
-            ),
-            'performing a in on a string' => array(
+            ],
+            'performing a in on a string' => [
                 'query' => '{"foo": {"$in": "a string"}}',
                 'message' => 'The operator $in must be called with an array',
-            ),
-        );
+            ],
+        ];
     }
 
     /**
