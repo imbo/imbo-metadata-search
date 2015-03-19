@@ -29,16 +29,35 @@ class ElasticSearchDsl implements DslTransformationInterface {
      * @return array
      */
     public function transform(AstNode $query) {
-        $transformed = $this->_transform($query);
+        $transformed = $this->transformAstToQuery($query);
 
-        if (key($transformed) !== 'query') {
-            // If the outer-most comparison wasn't `query`, it means it was an
-            // and or an or, which can only be used in filters, so we ensure
-            // the query will be a filter...
-            $transformed = array('filter' => $transformed);
+        switch (key($transformed)) {
+            // A simple query was returned, use it for the query part
+            // of the filtered query and set an empty filter
+            case 'query':
+                return [
+                    'query' => [
+                        'filtered' => [
+                            'query' => $transformed['query'],
+                            'filter' => []
+                        ]
+                    ]
+                ];
+
+            default:
+                // A filter was returned from transformAstToQuery. Add it
+                // to the list of filters and set an empty query.
+                return [
+                    'query' => [
+                        'filtered' => [
+                            'query' => [],
+                            'filter' => [
+                                $transformed
+                            ]
+                        ]
+                    ]
+                ];
         }
-
-        return $transformed;
     }
 
     /**
@@ -47,15 +66,15 @@ class ElasticSearchDsl implements DslTransformationInterface {
      * @param Imbo\MetadataSearch\Interfaces\DslAstInterface $query
      * @return array
      */
-    public function _transform(AstNode $query) {
-        switch(true) {
+    public function transformAstToQuery(AstNode $query) {
+        switch (true) {
             case $query instanceof Conjunction:
                 // We map conjunctions into `and`-filters.
-                return array('and' => array_map([$this, '_transform'], $query->getArrayCopy()));
+                return ['and' => array_map([$this, 'transformAstToQuery'], $query->getArrayCopy())];
 
             case $query instanceof Disjunction:
                 // ... and disjunctions into `or`-filters
-                return array('or' => array_map([$this, '_transform'], $query->getArrayCopy()));
+                return ['or' => array_map([$this, 'transformAstToQuery'], $query->getArrayCopy())];
 
             case $query instanceof Field:
                 // We have a field, so let's look at the type of comparison we
@@ -67,61 +86,61 @@ class ElasticSearchDsl implements DslTransformationInterface {
                 switch (true) {
                     case $comparison instanceof Equals:
                         // Equality we make into `match`-queries
-                        return array('query' => array('match' =>
-                            array($field => $comparison->value())
-                        ));
+                        return ['query' => ['match' =>
+                            [$field => $comparison->value()]
+                        ]];
 
                     case $comparison instanceof NotEquals:
                         // And not-equals we make into a not-filter with a
                         // `match`-filter inside it
-                        return array('not' => array('query' => array('match' =>
-                            array($field => $comparison->value())
-                        )));
+                        return ['not' => ['query' => ['match' =>
+                            [$field => $comparison->value()]
+                        ]]];
 
                     case $comparison instanceof In:
                         // We make in-set checks into a `terms`-filter
-                        return array('terms' => array(
+                        return ['terms' => [
                             $field => $comparison->value(),
-                        ));
+                        ]];
 
                     case $comparison instanceof NotIn:
                         // And likewise a not-in into a `not` filter wrapping a
                         // `terms`-filter.
-                        return array('not' => array('terms' => array(
+                        return ['not' => ['terms' => [
                             $field => $comparison->value(),
-                        )));
+                        ]]];
 
                     case $comparison instanceof LessThan:
                         // Less-than we do with a `range`-filter
-                        return array('range' => array(
-                            $field => array(
+                        return ['range' => [
+                            $field => [
                                 'lt' => $comparison->value(),
-                            ),
-                        ));
+                            ],
+                        ]];
 
                     case $comparison instanceof LessThanEquals:
                         // And like-wise with less-than-or-equals
-                        return array('range' => array(
-                            $field => array(
+                        return ['range' => [
+                            $field => [
                                 'lte' => $comparison->value(),
-                            ),
-                        ));
+                            ],
+                        ]];
 
                     case $comparison instanceof GreaterThan:
                         // ... and with greater-than
-                        return array('range' => array(
-                            $field => array(
+                        return ['range' => [
+                            $field => [
                                 'gt' => $comparison->value(),
-                            ),
-                        ));
+                            ],
+                        ]];
 
                     case $comparison instanceof GreaterThanEquals:
                         // and unsurprisingly also with greater-than-or-equals
-                        return array('range' => array(
-                            $field => array(
+                        return ['range' => [
+                            $field => [
                                 'gte' => $comparison->value(),
-                            ),
-                        ));
+                            ],
+                        ]];
                 }
         }
     }

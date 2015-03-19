@@ -23,10 +23,10 @@ class Search implements ResourceInterface {
      * {@inheritdoc}
      */
     public static function getSubscribedEvents() {
-        return array(
+        return [
             'search.get' => 'search',
             'search.head' => 'search',
-        );
+        ];
     }
 
     /**

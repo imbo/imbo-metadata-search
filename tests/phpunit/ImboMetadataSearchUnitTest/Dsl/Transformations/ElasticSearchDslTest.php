@@ -12,24 +12,35 @@ class ElasticSearchDslTest extends \PHPUnit_Framework_TestCase {
         $this->transformation = new ElasticSearchDsl();
     }
 
+    protected function buildExpectedQuery($query = [], $filters = []) {
+        return [
+            'query' => [
+                'filtered' => [
+                    'query' => $query,
+                    'filter' => $filters
+                ]
+            ]
+        ];
+    }
+
     public function getQueries() {
-        return array(
-            'a simple query' => array(
+        return [
+            'a simple query' => [
                 'query' => '{"foo": "bar"}',
-                'expected' => array('query' => array('match' => array('metadata.foo' => 'bar'))),
-            ),
-            'another simple query' => array(
+                'expected' => $this->buildExpectedQuery(['match' => ['metadata.foo' => 'bar']], []),
+            ],
+            'another simple query' => [
                 'query' => '{"foo": "bar", "baz": "blargh"}',
-                'expected' => array('filter' => array('and' => array(
-                                                        array('query' => array('match' => array('metadata.foo' => 'bar'))),
-                                                        array('query' => array('match' => array('metadata.baz' => 'blargh'))),
-                                                    ))),
-            ),
-            'a simple less-than query' => array(
+                'expected' => $this->buildExpectedQuery([], [['and' => [
+                                                                ['query' => ['match' => ['metadata.foo' => 'bar']]],
+                                                                ['query' => ['match' => ['metadata.baz' => 'blargh']]],
+                                                            ]]]),
+            ],
+            'a simple less-than query' => [
                 'query' => '{"foo": {"$lt": 5}}',
-                'expected' => array('filter' => array('range' => array('metadata.foo' => array('lt' => 5)))),
-            ),
-        );
+                'expected' => $this->buildExpectedQuery([], [['range' => ['metadata.foo' => ['lt' => 5]]]]),
+            ],
+        ];
     }
 
     /**
