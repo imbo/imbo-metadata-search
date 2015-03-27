@@ -230,7 +230,7 @@ class MetadataOperations implements ListenerInterface {
 
         // Query backend using the AST
         $backendResponse = $this->backend->search(
-            $request->getPublicKey(),
+            $users,
             $ast,
             $queryParams
         );

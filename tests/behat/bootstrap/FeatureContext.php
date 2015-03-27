@@ -35,7 +35,7 @@ class FeatureContext extends RESTContext implements Context, SnippetAcceptingCon
 
         try {
             $elasticsearch->indices()->delete([
-                'index' => 'metadatasearch_integration-*'
+                'index' => 'metadatasearch_integration'
             ]);
         } catch (Exception $e) {
             // We'll get a 404 if the index is non-existant - ignore it
@@ -107,7 +107,7 @@ class FeatureContext extends RESTContext implements Context, SnippetAcceptingCon
         $publicKey = 'publickey';
 
         $params = [
-            'index' => 'metadatasearch_integration-' . $publicKey,
+            'index' => 'metadatasearch_integration',
             'type' => 'metadata',
             'id' => $imageIdentifer
         ];

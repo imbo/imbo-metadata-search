@@ -23,11 +23,11 @@ class ElasticSearch implements SearchBackendInterface {
     /**
      * @var string
      */
-    protected $indexPrefix;
+    protected $indexName;
 
-    public function __construct(ElasticsearchClient $client, $indexPrefix = 'metadata-') {
+    public function __construct(ElasticsearchClient $client, $indexName = 'imbo_metadata') {
         $this->client = $client;
-        $this->indexPrefix = $indexPrefix;
+        $this->indexName = $indexName;
     }
 
     /**
@@ -73,7 +73,6 @@ class ElasticSearch implements SearchBackendInterface {
         $sort = isset($queryParams['sort']) ? $queryParams['sort'] : [];
 
         $params = $this->prepareParams(
-            $publicKey,
             null,
             $query,
             $sort
@@ -151,16 +150,35 @@ class ElasticSearch implements SearchBackendInterface {
     }
 
     /**
+     * Add user filter to params
+     *
+     * @param array $users Users to filter on
+     * @return array Modified params array
+     */
+    protected function addUserFilter(array $users) {
+        $params['body']['query']['filtered']['filter'][] = [
+            'or' => array_map(function($user) {
+                return [
+                    'term' => [
+                        'user' => $user
+                    ]
+                ];
+            }, $users)
+        ];
+
+        return $params;
+    }
+
+    /**
      * Creates a params array that can be consumed by the elasticsearch client
      *
-     * @param string $publicKey
      * @param string $imageIdentifier
      * @param array $metadata
      * @return array
      */
-    protected function prepareParams($publicKey, $imageIdentifier = null, $body = null, $sort = []) {
+    protected function prepareParams($imageIdentifier = null, $body = null, $sort = []) {
         $params = [
-            'index' => $this->getIndexName($publicKey),
+            'index' => $this->getIndexName(),
             'type' => 'metadata',
             'body' => []
         ];
@@ -180,7 +198,7 @@ class ElasticSearch implements SearchBackendInterface {
         return $params;
     }
 
-    public function getIndexName($publicKey) {
-        return $this->indexPrefix . $publicKey;
+    public function getIndexName() {
+        return $this->indexName;
     }
 }
