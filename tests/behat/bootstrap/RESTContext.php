@@ -44,7 +44,7 @@ class RESTContext implements Context
      *
      * @var array
      */
-    protected $requestHeaders = array();
+    protected $requestHeaders = [];
 
     /**
      * Class constructor
@@ -71,17 +71,17 @@ class RESTContext implements Context
      * Create a new HTTP client
      */
     private function createClient() {
-        $this->imbo = new ImboClient($this->params['url'], array(
+        $this->imbo = new ImboClient($this->params['url'], [
             'publicKey' => 'publickey',
             'privateKey' => 'privatekey',
-        ));
+        ]);
 
         $eventDispatcher = $this->imbo->getEventDispatcher();
         $eventDispatcher->addSubscriber($this->history);
 
-        $defaultHeaders = array(
+        $defaultHeaders = [
             'X-Test-Session-Id' => self::$testSessionId,
-        );
+        ];
 
         $this->imbo->setDefaultHeaders($defaultHeaders);
     }
@@ -168,7 +168,7 @@ class RESTContext implements Context
                             $router,
                             $httpdLog);
 
-        $output = array();
+        $output = [];
         exec($command, $output);
 
         return (int) $output[0];

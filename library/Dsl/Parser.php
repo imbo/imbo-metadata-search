@@ -26,17 +26,17 @@ class Parser {
      *
      * @var array
      */
-    private static $validQueryDslExpressions = array(
+    private static $validQueryDslExpressions = [
         '$or'       => true,
         '$and'      => true,
-    );
+    ];
 
     /**
      * Valid operators for metadata queries
      *
      * @var array
      */
-    private static $validQueryDslOperators = array(
+    private static $validQueryDslOperators = [
         '$gt'       => true,
         '$gte'      => true,
         '$in'       => true,
@@ -45,7 +45,7 @@ class Parser {
         '$ne'       => true,
         '$nin'      => true,
         '$wildcard' => false, // We want to support this - but not built yet
-    );
+    ];
 
     /**
      * Parse (and validate) a DSL search query.
@@ -91,7 +91,7 @@ class Parser {
      * @throws \InvalidArgumentException
      */
     private static function normalizeExpression(array $ast) {
-        $result = array();
+        $result = [];
 
         if (count($ast) === 1) {
             // The expression we are normalizing already only have one element.
@@ -119,15 +119,15 @@ class Parser {
                 // using normalizeField. Normalize field can change the key of
                 // the field, if it lifts our $and's.
                 list($key, $value) = self::normalizeField($key, $ast[$key]);
-                $result = array($key => $value);
+                $result = [$key => $value];
             }
         } else {
             // The expression wasn't normalized to only have one term in each
             // expression, so we convert it into a $and-expression where each
             // clause consists of one term. These terms are normalized too.
-            $result = array('$and' => []);
+            $result = ['$and' => []];
             foreach ($ast AS $key => $node) {
-                $result['$and'][] = self::normalizeExpression(array($key => $node));
+                $result['$and'][] = self::normalizeExpression([$key => $node]);
             }
         }
 
@@ -157,7 +157,7 @@ class Parser {
                 throw new InvalidArgumentException('No operations defined for the criteria on "' . $field . '"');
             }
 
-            $result = array();
+            $result = [];
             // Iterate over the operations on the field
             foreach ($value AS $key => $value) {
                 if (substr($key, 0, 1) !== "$") {
@@ -173,7 +173,7 @@ class Parser {
                 }
 
                 // Do some type-checking on the value for the operation
-                if (in_array($key, array('$in', '$nin'))) {
+                if (in_array($key, ['$in', '$nin'])) {
                     // If the operator is $in or $nin (not in), we check that
                     // the argument given is actually an array
                     if (!is_array($value)) {
@@ -188,7 +188,7 @@ class Parser {
                 }
 
                 // Then simply lift the operator out to a seperate operation.
-                $result[] = array($field => array($key => $value));
+                $result[] = [$field => [$key => $value]];
             }
 
             if (count($result) === 1) {
