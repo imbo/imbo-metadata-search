@@ -33,8 +33,8 @@ class ElasticSearch implements SearchBackendInterface {
     /**
      * {@inheritdoc}
      */
-    public function set($publicKey, $imageIdentifier, array $imageData) {
-        $params = $this->prepareParams($publicKey, $imageIdentifier, $imageData);
+    public function set($user, $imageIdentifier, array $imageData) {
+        $params = $this->prepareParams($imageIdentifier, $imageData);
 
         try {
             return !!$this->client->index($params);
@@ -48,8 +48,8 @@ class ElasticSearch implements SearchBackendInterface {
     /**
      * {@inheritdoc}
      */
-    public function delete($publicKey, $imageIdentifier) {
-        $params = $this->prepareParams($publicKey, $imageIdentifier);
+    public function delete($user, $imageIdentifier) {
+        $params = $this->prepareParams($imageIdentifier);
 
         try {
             return !!$this->client->delete($params);
@@ -63,7 +63,7 @@ class ElasticSearch implements SearchBackendInterface {
     /**
      * {@inheritdoc}
      */
-    public function search($publicKey, DslAstInterface $ast, array $queryParams) {
+    public function search(array $users, DslAstInterface $ast, array $queryParams) {
         $astTransformer = new ElasticSearchDsl();
 
         // Transform AST to ES query

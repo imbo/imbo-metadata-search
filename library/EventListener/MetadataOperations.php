@@ -36,13 +36,15 @@ class MetadataOperations implements ListenerInterface {
 
     public static function getSubscribedEvents() {
         return [
-            'image.delete' => ['delete' => -1000],
             'images.post' => ['set' => -1000],
+            'images.search' => 'search',
+
+            'image.delete' => ['delete' => -1000],
             'image.post' => ['set' => -1000],
+
             'metadata.post' => ['set' => -1000],
             'metadata.put' => ['set' => -1000],
-            'metadata.delete' => ['set' => -1000],
-            'metadata.search' => 'search',
+            'metadata.delete' => ['set' => -1000]
         ];
     }
 
@@ -196,8 +198,11 @@ class MetadataOperations implements ListenerInterface {
         $request = $event->getRequest();
         $params = $request->query;
 
+        // Users to get images for
+        $users = [$request->getUser()];
+
         // Extract query
-        $metadataQuery = $params->get('q');;
+        $metadataQuery = $request->getContent();
 
         // If no metadata is provided, we'll let db.images.load take over
         if (!$metadataQuery) {
@@ -206,7 +211,7 @@ class MetadataOperations implements ListenerInterface {
         }
 
         // Check access token
-        $event->getManager()->trigger('checkAccessToken');
+        $event->getManager()->trigger('auth.accesstoken');
 
         // Build query params array
         $queryParams = [
