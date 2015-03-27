@@ -40,14 +40,14 @@ Feature: Use elasticsearch as search backend for the metadata search pluin
         """
 
     Scenario: Search without using an access token
-        When I search for images using {"animal":"Snake"}
+        When I search for images from ["publickey"] using {"animal":"Snake"}
         Then I should get a response with "400 Missing access token"
 
     Scenario Outline: Search using metadata queries
         Given I include an access token in the query
         And I set the "limit" query param to "<limit>"
         And I set the "page" query param to "<page>"
-        When I search for images using <metadata>
+        When I search for images from ["publickey"] using <metadata>
         Then I should get a response with "200 OK"
         And I should get the <imageIdentifers> in the image response list
         And the hit count should be "<hits>"
@@ -64,7 +64,7 @@ Feature: Use elasticsearch as search backend for the metadata search pluin
     Scenario Outline: Search and sort the search result
         Given I include an access token in the query
         And I sort by <sort>
-        When I search for images using {"color":"red"}
+        When I search for images from ["publickey"] using {"color":"red"}
         Then I should get a response with "200 OK"
         And I should get the <imageIdentifiers> in the image response list
 

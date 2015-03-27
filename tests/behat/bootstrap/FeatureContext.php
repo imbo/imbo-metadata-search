@@ -189,14 +189,14 @@ class FeatureContext extends RESTContext implements Context, SnippetAcceptingCon
     }
 
     /**
-     * @When /^I search for images using (.*?)$/
+     * @When /^I search for images from (\[[^\]]+\]) using (.*?)$/
      */
-    public function iSearchForImagesUsing($metadata)
+    public function iSearchForImagesUsing($users, $metadata)
     {
-        $params = array_merge($this->queryParams, ['q' => $metadata]);
+        $users = json_decode($users);
 
         try {
-            $this->rawRequest('/users/publickey/search.json', 'GET', $params);
+            $this->rawRequest('/users/publickey/images', 'SEARCH', $this->queryParams, $metadata);
         } catch (Exception $e) {
             // We'll assert the status and such later, if we're interested
         }
