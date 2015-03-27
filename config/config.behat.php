@@ -54,19 +54,15 @@ $config = [
             'listener' => new EventListener\MetadataOperations([
                 'backend' => new Backend\ElasticSearch(
                     new \Elasticsearch\Client(),
-                    'metadatasearch_integration-'
+                    'metadatasearch_integration'
                 )
             ])
         ],
     ],
 
-    'resources' => [
-        'search' => new Resource\Search(),
-    ],
+    'resources' => [],
 
-    'routes' => [
-        'search' => '#^/users/(?<publicKey>[a-z0-9_-]{3,})/search(\.(?<extension>json|xml))?$#',
-    ],
+    'routes' => [],
 
     'eventListenerInitializers' => [
         'imagick' => 'Imbo\EventListener\Initializer\Imagick',
