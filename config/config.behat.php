@@ -2,21 +2,28 @@
 
 namespace Imbo\MetadataSearch;
 
-use Imbo\Auth\AccessControl\Adapter\AdapterInterface as ACI;
+use Imbo\Auth\AccessControl as ACL;
 
 $config = [
     'accessControl' => function() {
-        return new \Imbo\Auth\AccessControl\Adapter\ArrayAdapter([
+        return new ACL\Adapter\ArrayAdapter([
             [
                 'publicKey' => 'publickey',
                 'privateKey' => 'privatekey',
                 'acl' => [
                     [
-                        'resources' => array_merge(
-                            \Imbo\Auth\AccessControl\Adapter\ArrayAdapter::getReadOnlyResources(),
-                            \Imbo\Auth\AccessControl\Adapter\ArrayAdapter::getReadWriteResources()
-                        ),
-                        'users' => ['publickey'],
+                        'resources' => ACL\Adapter\ArrayAdapter::getReadWriteResources(),
+                        'users' => ['publickey', 'user1'],
+                    ]
+                ]
+            ],
+            [
+                'publicKey' => 'user1',
+                'privateKey' => 'privatekey',
+                'acl' => [
+                    [
+                        'resources' => ACL\Adapter\ArrayAdapter::getReadWriteResources(),
+                        'users' => ['user1'],
                     ]
                 ]
             ]

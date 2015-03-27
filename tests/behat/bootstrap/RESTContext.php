@@ -249,6 +249,16 @@ class RESTContext implements Context
     }
 
     /**
+     * @Given /^I use "([^"]*)" and "([^"]*)" for public and private keys$/
+     */
+    public function setClientAuth($publicKey, $privateKey) {
+        $this->imbo->setConfig([
+            'publicKey' => $publicKey,
+            'privateKey' => $privateKey,
+        ]);
+    }
+
+    /**
      * @Then /^I should get a response with "([^"]*)"$/
      */
     public function assertResponseStatus($status) {
@@ -262,7 +272,7 @@ class RESTContext implements Context
     /**
      * @Given I set the :param query param to :value
      */
-    public function iSetTheQueryParamTo($param, $value)
+    public function setQueryParam($param, $value)
     {
         $this->queryParams[$param] = $value;
     }

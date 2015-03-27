@@ -49,20 +49,20 @@ class FeatureContext extends RESTContext implements Context, SnippetAcceptingCon
     }
 
     /**
-     * @Given The following images exist in Imbo:
+     * @Given I have flushed the elasticsearch transaction log
+     */
+    public function flushElasticsearch() {
+        $this->elasticsearch->indices()->flush();
+    }
+
+    /**
+     * @Given I add the following images to Imbo:
      */
     public function theFollowingImagesExistInImbo(TableNode $images)
     {
         foreach ($images as $image) {
             $this->addImageToImbo($image['file'], json_decode($image['metadata'], true));
         }
-    }
-
-    /**
-     * @Given I have flushed the elasticsearch transaction log
-     */
-    public function flushElasticsearch() {
-        $this->elasticsearch->indices()->flush();
     }
 
     /**
@@ -189,14 +189,26 @@ class FeatureContext extends RESTContext implements Context, SnippetAcceptingCon
     }
 
     /**
-     * @When /^I search for images from (\[[^\]]+\]) using (.*?)$/
+     * @When /^I search for images from (.*?) using (.*?)$/
      */
     public function iSearchForImagesUsing($users, $metadata)
     {
-        $users = json_decode($users);
-
         try {
             $this->rawRequest('/users/publickey/images', 'SEARCH', $this->queryParams, $metadata);
+        } catch (Exception $e) {
+            // We'll assert the status and such later, if we're interested
+        }
+    }
+
+    /**
+     * @When /^I search in images belonging to the users (\[[^\]]+\]) using (.*?)$/
+     */
+    public function iSearchInImagesBelongingToTheUsersUsingMetadata($users, $metadata)
+    {
+        $this->setQueryParam('user', $users);
+
+        try {
+            $this->rawRequest('/images', 'SEARCH', $this->queryParams, $metadata);
         } catch (Exception $e) {
             // We'll assert the status and such later, if we're interested
         }
