@@ -447,12 +447,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/kbrabrand/imbo.git",
-                "reference": "6a105c5ec8be993aea7566df6098043af52a31b2"
+                "reference": "25f066e95f123de41507caabf90b8d1e73f97336"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/kbrabrand/imbo/zipball/6a105c5ec8be993aea7566df6098043af52a31b2",
-                "reference": "6a105c5ec8be993aea7566df6098043af52a31b2",
+                "url": "https://api.github.com/repos/kbrabrand/imbo/zipball/25f066e95f123de41507caabf90b8d1e73f97336",
+                "reference": "25f066e95f123de41507caabf90b8d1e73f97336",
                 "shasum": ""
             },
             "require": {
@@ -512,7 +512,7 @@
                 "irc": "irc://irc.freenode.net/imbo",
                 "source": "https://github.com/kbrabrand/imbo/tree/access-control"
             },
-            "time": "2015-03-25 07:52:04"
+            "time": "2015-03-27 15:22:57"
         },
         {
             "name": "imbo/imbo-phpcs-standard",
