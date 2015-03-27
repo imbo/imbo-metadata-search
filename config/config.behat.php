@@ -2,10 +2,26 @@
 
 namespace Imbo\MetadataSearch;
 
+use Imbo\Auth\AccessControl\Adapter\AdapterInterface as ACI;
+
 $config = [
-    'auth' => [
-        'publickey' => 'privatekey'
-    ],
+    'accessControl' => function() {
+        return new \Imbo\Auth\AccessControl\Adapter\ArrayAdapter([
+            [
+                'publicKey' => 'publickey',
+                'privateKey' => 'privatekey',
+                'acl' => [
+                    [
+                        'resources' => array_merge(
+                            \Imbo\Auth\AccessControl\Adapter\ArrayAdapter::getReadOnlyResources(),
+                            \Imbo\Auth\AccessControl\Adapter\ArrayAdapter::getReadWriteResources()
+                        ),
+                        'users' => ['publickey'],
+                    ]
+                ]
+            ]
+        ]);
+    },
 
     'database' => function() {
         return new \Imbo\Database\MongoDB([
