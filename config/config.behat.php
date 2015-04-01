@@ -56,7 +56,8 @@ $config = [
 
         'imagick' => 'Imbo\EventListener\Imagick',
 
-        'metadata-access-token' => new EventListener\AccessToken(),
+        'metadata-access-token' => 'Imbo\MetadataSearch\EventListener\AccessToken',
+
         'metadata' => [
             'listener' => new EventListener\MetadataOperations([
                 'backend' => new Backend\ElasticSearch(
