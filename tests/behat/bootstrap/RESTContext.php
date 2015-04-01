@@ -215,13 +215,23 @@ class RESTContext implements Context
             $this->requestHeaders['Accept'] = 'application/json';
         }
 
-        // Add override method header if specified in the list of override verbs
+        // Explicitly set the public key header
+        $this->requestHeaders['X-Imbo-PublicKey'] = $this->imbo->getConfig('publicKey');
+
+        $overrideMethod = false;
+
+        // Override method
         if (array_key_exists($method, $this->getOverrideVerbs())) {
-            $this->requestHeaders['X-Http-Method-Override'] = $method;
+            $overrideMethod = $method;
             $method = $this->getOverrideVerbs()[$method];
         }
 
         $request = $this->imbo->createRequest($method, $path, $this->requestHeaders, $body);
+
+        // Set override method header
+        if ($overrideMethod) {
+            $request->setHeader('X-Http-Method-Override', $overrideMethod);
+        }
 
         // Add query params
         $request->getQuery()->merge($params);
@@ -266,7 +276,7 @@ class RESTContext implements Context
 
         $actual = $response->getStatusCode() . ' ' . $response->getReasonPhrase();
 
-        Assertion::same($status, $actual);
+        Assertion::same($actual, $status);
     }
 
     /**

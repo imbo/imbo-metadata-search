@@ -189,12 +189,12 @@ class FeatureContext extends RESTContext implements Context, SnippetAcceptingCon
     }
 
     /**
-     * @When /^I search for images from (.*?) using (.*?)$/
+     * @When /^I search for images from "(.*?)" using (.*?)$/
      */
-    public function iSearchForImagesUsing($users, $metadata)
+    public function iSearchForImagesUsing($user, $metadata)
     {
         try {
-            $this->rawRequest('/users/publickey/images', 'SEARCH', $this->queryParams, $metadata);
+            $this->rawRequest('/users/' . $user . '/images', 'SEARCH', $this->queryParams, $metadata);
         } catch (Exception $e) {
             // We'll assert the status and such later, if we're interested
         }
@@ -205,7 +205,7 @@ class FeatureContext extends RESTContext implements Context, SnippetAcceptingCon
      */
     public function iSearchInImagesBelongingToTheUsersUsingMetadata($users, $metadata)
     {
-        $this->setQueryParam('user', $users);
+        $this->setQueryParam('user', json_decode($users));
 
         try {
             $this->rawRequest('/images', 'SEARCH', $this->queryParams, $metadata);
@@ -226,6 +226,6 @@ class FeatureContext extends RESTContext implements Context, SnippetAcceptingCon
             $sortArray[] = sprintf('%s:%s', $key, $dir);
         }
 
-        $this->iSetTheQueryParamTo('sort', $sortArray);
+        $this->setQueryParam('sort', $sortArray);
     }
 }
