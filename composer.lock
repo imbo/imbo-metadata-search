@@ -4,7 +4,7 @@
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "7cec193f858402f135396a22c8ec9a99",
+    "hash": "270a76a859b488e2b9506d426cbe5eb5",
     "packages": [],
     "packages-dev": [
         {
@@ -443,16 +443,16 @@
         },
         {
             "name": "imbo/imbo",
-            "version": "dev-access-control",
+            "version": "dev-global-images-endpoint",
             "source": {
                 "type": "git",
                 "url": "https://github.com/kbrabrand/imbo.git",
-                "reference": "25f066e95f123de41507caabf90b8d1e73f97336"
+                "reference": "fcaf2d433d886733143adbdd9ad5642ba622cd4b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/kbrabrand/imbo/zipball/25f066e95f123de41507caabf90b8d1e73f97336",
-                "reference": "25f066e95f123de41507caabf90b8d1e73f97336",
+                "url": "https://api.github.com/repos/kbrabrand/imbo/zipball/fcaf2d433d886733143adbdd9ad5642ba622cd4b",
+                "reference": "fcaf2d433d886733143adbdd9ad5642ba622cd4b",
                 "shasum": ""
             },
             "require": {
@@ -510,9 +510,9 @@
             "support": {
                 "issues": "https://github.com/imbo/imbo/issues",
                 "irc": "irc://irc.freenode.net/imbo",
-                "source": "https://github.com/kbrabrand/imbo/tree/access-control"
+                "source": "https://github.com/kbrabrand/imbo/tree/global-images-endpoint"
             },
-            "time": "2015-03-27 15:22:57"
+            "time": "2015-03-27 19:26:34"
         },
         {
             "name": "imbo/imbo-phpcs-standard",
