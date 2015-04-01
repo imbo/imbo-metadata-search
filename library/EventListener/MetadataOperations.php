@@ -36,6 +36,8 @@ class MetadataOperations implements ListenerInterface {
 
     public static function getSubscribedEvents() {
         return [
+            'globalimages.search' => 'globalSearch',
+
             'images.post' => ['set' => -1000],
             'images.search' => 'search',
 
@@ -182,7 +184,37 @@ class MetadataOperations implements ListenerInterface {
     }
 
     /**
-     * Handle metadata search operation - return list of imageIdentifers
+     * Handler for search on a single user
+     *
+     * @param Imbo\EventListener\ListenerInterface $event The current event
+     */
+    public function search(EventInterface $event) {
+        $request = $event->getRequest();
+        $params = $request->query;
+
+        // Users to get images for
+        $users = [$request->getUser()];
+
+        $this->searchHandler($event, $users);
+    }
+
+    /**
+     * Handler for global (multi-user) search
+     *
+     * @param Imbo\EventListener\ListenerInterface $event The current event
+     */
+     public function globalSearch(EventInterface $event) {
+        $request = $event->getRequest();
+        $params = $request->query;
+
+        // Users to get images for
+        $users = $request->getUsers();
+
+        $this->searchHandler($event, $users);
+     }
+
+    /**
+     * Handle metadata search operation
      *
      * page     => Page number. Defaults to 1
      * limit    => Limit to a number of images pr. page. Defaults to 20
@@ -194,12 +226,9 @@ class MetadataOperations implements ListenerInterface {
      * @param Imbo\EventListener\ListenerInterface $event The current event
      * @param string[] Array with image identifiers
      */
-    public function search(EventInterface $event) {
+    protected function searchHandler(EventInterface $event, array $users) {
         $request = $event->getRequest();
         $params = $request->query;
-
-        // Users to get images for
-        $users = [$request->getUser()];
 
         // Extract query
         $metadataQuery = $request->getContent();
