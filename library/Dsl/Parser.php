@@ -154,7 +154,7 @@ class Parser {
 
             if (empty($value)) {
                 // Except it wasn't, because it was an empty array
-                throw new InvalidArgumentException('No operations defined for the criteria on "' . $field . '"');
+                throw new InvalidArgumentException('No operations defined for the criteria on "' . $field . '"', 400);
             }
 
             $result = [];
@@ -164,12 +164,12 @@ class Parser {
                     // We have found something that wasn't an operation. This
                     // means that it was actually an embedded document that we
                     // do not support.
-                    throw new InvalidArgumentException('Imbo does not support exact matches on embedded documents. Please use dot-syntax instead');
+                    throw new InvalidArgumentException('Imbo does not support exact matches on embedded documents. Please use dot-syntax instead', 400);
                 }
 
                 // Check that the operator is allowed
                 if (empty(self::$validQueryDslOperators[$key])) {
-                    throw new InvalidArgumentException('Operator of the type ' . $key . ' not allowed');
+                    throw new InvalidArgumentException('Operator of the type ' . $key . ' not allowed', 400);
                 }
 
                 // Do some type-checking on the value for the operation
@@ -177,13 +177,13 @@ class Parser {
                     // If the operator is $in or $nin (not in), we check that
                     // the argument given is actually an array
                     if (!is_array($value)) {
-                        throw new InvalidArgumentException('The operator ' . $key . ' must be called with an array');
+                        throw new InvalidArgumentException('The operator ' . $key . ' must be called with an array', 400);
                     }
                 } else {
                     // The operator is not working on sets, we the value can't
                     // be an array
                     if (is_array($value)) {
-                        throw new InvalidArgumentException('The operator ' . $key . ' must not be called with an array');
+                        throw new InvalidArgumentException('The operator ' . $key . ' must not be called with an array', 400);
                     }
                 }
 
