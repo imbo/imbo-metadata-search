@@ -19,4 +19,4 @@ default:
             timeout: 5
 
             # httpd log file location
-            httpdLog: /dev/null
+            httpdLog: %paths.base%/../../build/logs/httpd.log
