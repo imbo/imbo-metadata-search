@@ -18,6 +18,7 @@ class FeatureContext extends RESTContext implements Context, SnippetAcceptingCon
         parent::__construct($url, $documentRoot, $router, $httpdLog, $timeout);
 
         $this->elasticsearch = new ElasticsearchClient();
+        $this->images = [];
     }
 
     /**
@@ -68,76 +69,79 @@ class FeatureContext extends RESTContext implements Context, SnippetAcceptingCon
     /**
      * @Given /^"([^"]*)" exists in Imbo with metadata (.*)$/
      */
-    public function addImageToImbo($imagePath, $metadata) {
-        $res = $this->imbo->addImage($imagePath);
+    public function addImageToImbo($imageName, $metadata) {
+        $res = $this->imbo->addImage('tests/fixtures/' . $imageName . '.jpg');
+
+        // Add image to images var so we have a way of looking them up later
+        $this->images[$imageName] = $res->get('imageIdentifier');
 
         if ($metadata) {
-            $this->setImageMetadata($res['imageIdentifier'], $metadata);
+            $this->setImageMetadata($imageName, $metadata);
         }
     }
 
     /**
-     * @When /^I set the following metadata on an image with identifier "([^"]*)":$/
+     * @When /^I set the following metadata on the "([^"]*)" image:$/
      */
-    public function setImageMetadata($imageIdentifier, $metadata) {
+    public function setImageMetadata($imageName, $metadata) {
         if ($metadata instanceof PyStringNode) {
             $metadata = json_decode($metadata, true);
         }
 
-        $this->imbo->replaceMetadata($imageIdentifier, $metadata);
+        $this->imbo->replaceMetadata($this->images[$imageName], $metadata);
     }
 
     /**
-     * @Given I patch the metadata of the image with identifier :imageIdentifer with:
+     * @Given I patch the metadata of the :imageName image with:
      */
-    public function iPatchTheMetadataOfTheImageWithIdentifierWith($imageIdentifer, PyStringNode $metadata)
+    public function iPatchTheMetadataOfTheImageWithIdentifierWith($imageName, PyStringNode $metadata)
     {
         if ($metadata instanceof PyStringNode) {
             $metadata = json_decode($metadata, true);
         }
 
-        $this->imbo->editMetadata($imageIdentifer, $metadata);
+        $this->imbo->editMetadata($this->images[$imageName], $metadata);
     }
 
     /**
-     * @Then Elasticsearch should have the following metadata for :imageIdentifer:
+     * @Then /^Elasticsearch should have the following metadata for the "([^"]*)" image:$/
      */
-    public function elasticsearchShouldHaveTheFollowingMetadataFor($imageIdentifer, PyStringNode $metadata)
+    public function elasticsearchShouldHaveTheFollowingMetadataFor($imageName, PyStringNode $metadata)
     {
         $publicKey = 'publickey';
 
         $params = [
             'index' => 'metadatasearch_integration',
             'type' => 'metadata',
-            'id' => $imageIdentifer
+            'id' => $this->images[$imageName]
         ];
 
         $retDoc = $this->elasticsearch->get($params);
 
         if ($metadata && !$retDoc) {
-            throw new \Exception('Image ' . $imageIdentifer . ' not found in ES');
+            throw new \Exception('Image ' . $imageName . ' not found in ES');
         }
 
         Assertion::eq(json_encode($retDoc['_source']['metadata']), (string) $metadata);
     }
 
     /**
-     * @Then Elasticsearch should not have metadata for :imageIdentifer
+     * @Then Elasticsearch should not have metadata for the :imageName image
      */
-    public function elasticsearchShouldNotHaveMetadataFor($imageIdentifer)
+    public function elasticsearchShouldNotHaveMetadataFor($imageName)
     {
         $this->elasticsearchShouldHaveTheFollowingMetadataFor(
-            $imageIdentifer,
+            $imageName,
             new PyStringNode(['[]'], null)
         );
     }
 
     /**
-     * @When I delete metadata from image :imageIdentifier
+     * @When I delete metadata from the :imageName image
      */
-    public function deleteMetadataFromImage($imageIdentifier)
+    public function deleteMetadataFromImage($imageName)
     {
-        $this->imbo->deleteMetadata($imageIdentifier);
+        $this->imbo->deleteMetadata($this->images[$imageName]);
     }
 
     /**
@@ -153,14 +157,16 @@ class FeatureContext extends RESTContext implements Context, SnippetAcceptingCon
     }
 
     /**
-     * @Then /^I should get the (.*?) in the image response list$/
+     * @Then /^I should get (.*?) in the image response list$/
      */
-    public function iShouldGetTheInTheImageResponseList($imageIdentifers)
+    public function imagesShouldExistInTheResponseList($imageNames)
     {
         $responseBody = $this->getLastResponse()->json();
 
         // Build list of expected values
-        $expectedIdentifiers = array_filter(explode(',', $imageIdentifers));
+        $expectedIdentifiers = array_map(function($imageName) {
+            return $this->images[$imageName];
+        }, array_filter(explode(',', $imageNames)));
 
         $actualIdentifiers = array_map(function($image) {
             return $image['imageIdentifier'];
