@@ -23,18 +23,18 @@ class ElasticSearch implements SearchBackendInterface {
     /**
      * @var string
      */
-    protected $indexPrefix;
+    protected $indexName;
 
-    public function __construct(ElasticsearchClient $client, $indexPrefix = 'metadata-') {
+    public function __construct(ElasticsearchClient $client, $indexName = 'imbo_metadata') {
         $this->client = $client;
-        $this->indexPrefix = $indexPrefix;
+        $this->indexName = $indexName;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function set($publicKey, $imageIdentifier, array $imageData) {
-        $params = $this->prepareParams($publicKey, $imageIdentifier, $imageData);
+    public function set($user, $imageIdentifier, array $imageData) {
+        $params = $this->prepareParams($imageIdentifier, $imageData);
 
         try {
             return !!$this->client->index($params);
@@ -48,8 +48,8 @@ class ElasticSearch implements SearchBackendInterface {
     /**
      * {@inheritdoc}
      */
-    public function delete($publicKey, $imageIdentifier) {
-        $params = $this->prepareParams($publicKey, $imageIdentifier);
+    public function delete($user, $imageIdentifier) {
+        $params = $this->prepareParams($imageIdentifier);
 
         try {
             return !!$this->client->delete($params);
@@ -63,7 +63,7 @@ class ElasticSearch implements SearchBackendInterface {
     /**
      * {@inheritdoc}
      */
-    public function search($publicKey, DslAstInterface $ast, array $queryParams) {
+    public function search(array $users, DslAstInterface $ast, array $queryParams) {
         $astTransformer = new ElasticSearchDsl();
 
         // Transform AST to ES query
@@ -73,11 +73,13 @@ class ElasticSearch implements SearchBackendInterface {
         $sort = isset($queryParams['sort']) ? $queryParams['sort'] : [];
 
         $params = $this->prepareParams(
-            $publicKey,
             null,
             $query,
             $sort
         );
+
+        // Set which users to get images from
+        $params = $this->addUserFilter($params, $users);
 
         // Set page and limit
         $params = $this->setPageAndLimit(
@@ -145,7 +147,30 @@ class ElasticSearch implements SearchBackendInterface {
             $rangeFilter['range']['added']['lte'] = $to;
         }
 
-        $params['body']['query']['filtered']['filter'][] = $rangeFilter;
+        $params['body']['query']['filtered']['filter']['and'][] = $rangeFilter;
+
+        return $params;
+    }
+
+    /**
+     * Add user filter to params
+     *
+     * @param array $params Params array
+     * @param array $users Users to filter on
+     * @return array Modified params array
+     */
+    protected function addUserFilter(array $params, array $users) {
+        $userFilter = [
+            'or' => array_map(function($user) {
+                return [
+                    'term' => [
+                        'user' => $user
+                    ]
+                ];
+            }, $users)
+        ];
+
+        $params['body']['query']['filtered']['filter']['and'][] = $userFilter;
 
         return $params;
     }
@@ -153,14 +178,13 @@ class ElasticSearch implements SearchBackendInterface {
     /**
      * Creates a params array that can be consumed by the elasticsearch client
      *
-     * @param string $publicKey
      * @param string $imageIdentifier
-     * @param array $metadata
+     * @param array $query
      * @return array
      */
-    protected function prepareParams($publicKey, $imageIdentifier = null, $body = null, $sort = []) {
+    protected function prepareParams($imageIdentifier = null, $query = null, $sort = []) {
         $params = [
-            'index' => $this->getIndexName($publicKey),
+            'index' => $this->getIndexName(),
             'type' => 'metadata',
             'body' => []
         ];
@@ -169,8 +193,18 @@ class ElasticSearch implements SearchBackendInterface {
             $params['id'] = $imageIdentifier;
         }
 
-        if ($body !== null) {
-            $params['body'] = array_merge($params['body'], $body);
+        if ($query !== null) {
+            $params['body'] = array_merge($params['body'], $query);
+        }
+
+        if (isset($params['body']['query']['filtered']['filter'][0])) {
+            $params['body']['query']['filtered']['filter'] = [
+                'and' => [
+                    $params['body']['query']['filtered']['filter'][0]
+                ]
+            ];
+        } else {
+            $params['body']['query']['filtered']['filter'] = ['and' => []];
         }
 
         if ($sort) {
@@ -180,7 +214,7 @@ class ElasticSearch implements SearchBackendInterface {
         return $params;
     }
 
-    public function getIndexName($publicKey) {
-        return $this->indexPrefix . $publicKey;
+    public function getIndexName() {
+        return $this->indexName;
     }
 }

@@ -11,12 +11,4 @@ return [
             ])
         ],
     ],
-
-    'resources' => [
-        'search' => new Resource\Search(),
-    ],
-
-    'routes' => [
-        'search' => '#^/users/(?<publicKey>[a-z0-9_-]{3,})/search(\.(?<extension>json|xml))?#',
-    ],
 ];

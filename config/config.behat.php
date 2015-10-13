@@ -2,10 +2,33 @@
 
 namespace Imbo\MetadataSearch;
 
+use Imbo\Auth\AccessControl as ACL;
+
 $config = [
-    'auth' => [
-        'publickey' => 'privatekey'
-    ],
+    'accessControl' => function() {
+        return new ACL\Adapter\ArrayAdapter([
+            [
+                'publicKey' => 'publickey',
+                'privateKey' => 'privatekey',
+                'acl' => [
+                    [
+                        'resources' => ACL\Adapter\ArrayAdapter::getReadWriteResources(),
+                        'users' => ['publickey', 'user1'],
+                    ]
+                ]
+            ],
+            [
+                'publicKey' => 'user1',
+                'privateKey' => 'privatekey',
+                'acl' => [
+                    [
+                        'resources' => ACL\Adapter\ArrayAdapter::getReadWriteResources(),
+                        'users' => ['user1'],
+                    ]
+                ]
+            ]
+        ]);
+    },
 
     'database' => function() {
         return new \Imbo\Database\MongoDB([
@@ -33,24 +56,21 @@ $config = [
 
         'imagick' => 'Imbo\EventListener\Imagick',
 
-        'metadata-access-token' => new EventListener\AccessToken(),
+        'metadata-access-token' => 'Imbo\MetadataSearch\EventListener\AccessToken',
+
         'metadata' => [
             'listener' => new EventListener\MetadataOperations([
                 'backend' => new Backend\ElasticSearch(
                     new \Elasticsearch\Client(),
-                    'metadatasearch_integration-'
+                    'metadatasearch_integration'
                 )
             ])
         ],
     ],
 
-    'resources' => [
-        'search' => new Resource\Search(),
-    ],
+    'resources' => [],
 
-    'routes' => [
-        'search' => '#^/users/(?<publicKey>[a-z0-9_-]{3,})/search(\.(?<extension>json|xml))?$#',
-    ],
+    'routes' => [],
 
     'eventListenerInitializers' => [
         'imagick' => 'Imbo\EventListener\Initializer\Imagick',

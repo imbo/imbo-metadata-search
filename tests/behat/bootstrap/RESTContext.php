@@ -68,6 +68,21 @@ class RESTContext implements Context
     }
 
     /**
+     * Returns a list of HTTP verbs that we need to do an override of in order
+     * to bypass limitations in the built-in PHP HTTP server.
+     *
+     * The returned list contains the verb to use override for, and what verb
+     * to use when overriding. For instance POST could be used when we want to
+     * perform a SEARCH request as a payload is expected while GET could be used
+     * if we want to test something using the LINK method.
+     */
+    private function getOverrideVerbs() {
+        return [
+            'SEARCH' => 'POST'
+        ];
+    }
+
+    /**
      * Create a new HTTP client
      */
     private function createClient() {
@@ -195,12 +210,28 @@ class RESTContext implements Context
         return true;
     }
 
-    public function rawRequest($path, $method = 'GET', $params = []) {
+    public function rawRequest($path, $method = 'GET', $params = [], $body = null) {
         if (empty($this->requestHeaders['Accept'])) {
             $this->requestHeaders['Accept'] = 'application/json';
         }
 
-        $request = $this->imbo->createRequest($method, $path, $this->requestHeaders);
+        // Explicitly set the public key header
+        $this->requestHeaders['X-Imbo-PublicKey'] = $this->imbo->getConfig('publicKey');
+
+        $overrideMethod = false;
+
+        // Override method
+        if (array_key_exists($method, $this->getOverrideVerbs())) {
+            $overrideMethod = $method;
+            $method = $this->getOverrideVerbs()[$method];
+        }
+
+        $request = $this->imbo->createRequest($method, $path, $this->requestHeaders, $body);
+
+        // Set override method header
+        if ($overrideMethod) {
+            $request->setHeader('X-Http-Method-Override', $overrideMethod);
+        }
 
         // Add query params
         $request->getQuery()->merge($params);
@@ -228,6 +259,16 @@ class RESTContext implements Context
     }
 
     /**
+     * @Given /^I use "([^"]*)" and "([^"]*)" for public and private keys$/
+     */
+    public function setClientAuth($publicKey, $privateKey) {
+        $this->imbo->setConfig([
+            'publicKey' => $publicKey,
+            'privateKey' => $privateKey,
+        ]);
+    }
+
+    /**
      * @Then /^I should get a response with "([^"]*)"$/
      */
     public function assertResponseStatus($status) {
@@ -235,13 +276,13 @@ class RESTContext implements Context
 
         $actual = $response->getStatusCode() . ' ' . $response->getReasonPhrase();
 
-        Assertion::same($status, $actual);
+        Assertion::same($actual, $status);
     }
 
     /**
      * @Given I set the :param query param to :value
      */
-    public function iSetTheQueryParamTo($param, $value)
+    public function setQueryParam($param, $value)
     {
         $this->queryParams[$param] = $value;
     }

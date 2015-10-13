@@ -17,14 +17,19 @@
         "issues": "https://github.com/imbo/imbo-metadata-search",
         "irc": "irc://irc.freenode.net/imbo"
     },
-
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "git@github.com:kbrabrand/imbo.git"
+        }
+    ],
     "require": {
         "php": ">=5.4.0"
     },
     "require-dev": {
         "ext-imagick": ">=3.0.1",
         "phpunit/phpunit": "~4.3",
-        "imbo/imbo": "~1.2.3",
+        "imbo/imbo": "dev-beta2.0",
         "behat/behat": "~3.0",
         "squizlabs/php_codesniffer": "~2.2",
         "imbo/imbo-phpcs-standard": "dev-master",

@@ -36,16 +36,27 @@ class MetadataOperations implements ListenerInterface {
 
     public static function getSubscribedEvents() {
         return [
-            'image.delete' => ['delete' => -1000],
+            'globalimages.search' => 'globalSearch',
+
             'images.post' => ['set' => -1000],
+            'images.search' => 'search',
+
+            'image.delete' => ['delete' => -1000],
             'image.post' => ['set' => -1000],
+
             'metadata.post' => ['set' => -1000],
             'metadata.put' => ['set' => -1000],
-            'metadata.delete' => ['set' => -1000],
-            'metadata.search' => 'search',
+            'metadata.delete' => ['set' => -1000]
         ];
     }
 
+    /**
+     * Get image data for a given image identifier
+     *
+     * @param Imbo\EventListener\ListenerInterface $event
+     * @param array $imageIdentifier Image identifier of image to get data about
+     * @return Imbo\Model\Image
+     */
     public function getImageData($event, $imageIdentifier) {
         $image = new ImageModel();
 
@@ -72,15 +83,15 @@ class MetadataOperations implements ListenerInterface {
      * the order of the imageIdentifiers in the second argument
      *
      * @param $responseModel Response containing the images
-     * @param string[] List of identifiers as returned from backend
+     * @param array List of image identifiers as returned from backend
      * @return void
      */
-    public function sortSearchResponse($responseModel, $identifiers) {
+    public function sortSearchResponse($responseModel, $imageIdentifiers) {
         $images = $responseModel->getImages();
 
         $result = [];
         foreach ($images as $image) {
-           $key = array_search($image->getImageIdentifier(), $identifiers);
+           $key = array_search($image->getImageIdentifier(), $imageIdentifiers);
            $result[$key] = $image;
         }
 
@@ -152,10 +163,10 @@ class MetadataOperations implements ListenerInterface {
 
         // Pass image data to the search backend
         $this->backend->set(
-            $request->getPublicKey(),
+            $request->getUser(),
             $imageIdentifier,
             [
-                'publicKey' => $request->getPublicKey(),
+                'user' => $request->getUser(),
                 'size' => $image->getFilesize(),
                 'extension' => $image->getExtension(),
                 'mime' => $image->getMimeType(),
@@ -180,7 +191,69 @@ class MetadataOperations implements ListenerInterface {
     }
 
     /**
-     * Handle metadata search operation - return list of imageIdentifers
+     * Handler for search on a single user
+     *
+     * @param Imbo\EventListener\ListenerInterface $event The current event
+     */
+    public function search(EventInterface $event) {
+        $request = $event->getRequest();
+        $params = $request->query;
+        $user = $request->getUser();
+
+        $this->searchHandler($event, [$user]);
+    }
+
+    /**
+     * Handler for global (multi-user) search
+     *
+     * @param Imbo\EventListener\ListenerInterface $event The current event
+     */
+     public function globalSearch(EventInterface $event) {
+        $request = $event->getRequest();
+        $params = $request->query;
+        $users = $request->getUsers();
+
+        if (empty($users)) {
+            throw new RuntimeException('One or more users must be specified', 400);
+        }
+
+        $this->searchHandler($event, $users);
+     }
+
+    /**
+     * Check that the public key has access to the users
+     *
+     * @param Imbo\EventListener\ListenerInterface $event
+     * @param array $users Array of user strings
+     */
+    protected function validateAccess(EventInterface $event, array $users) {
+        $acl = $event->getAccessControl();
+
+        $missingAccess = [];
+
+        foreach ($users as $user) {
+            $hasAccess = $acl->hasAccess(
+                $event->getRequest()->getPublicKey(),
+                'images.get',
+                $user
+            );
+            if (!$hasAccess) {
+                $missingAccess[] = $user;
+            }
+        }
+
+        if (!empty($missingAccess)) {
+            throw new RuntimeException(
+                'Public key does not have access to the users: [' .
+                implode(', ', $missingAccess) .
+                ']',
+                400
+            );
+        }
+    }
+
+    /**
+     * Handle metadata search operation
      *
      * page     => Page number. Defaults to 1
      * limit    => Limit to a number of images pr. page. Defaults to 20
@@ -190,14 +263,14 @@ class MetadataOperations implements ListenerInterface {
      * to       => Unit timestamp to fetch to
      *
      * @param Imbo\EventListener\ListenerInterface $event The current event
-     * @param string[] Array with image identifiers
+     * @param array $users Array with image identifiers
      */
-    public function search(EventInterface $event) {
+    protected function searchHandler(EventInterface $event, array $users) {
         $request = $event->getRequest();
         $params = $request->query;
 
         // Extract query
-        $metadataQuery = $params->get('q');;
+        $metadataQuery = $request->getContent();
 
         // If no metadata is provided, we'll let db.images.load take over
         if (!$metadataQuery) {
@@ -206,7 +279,10 @@ class MetadataOperations implements ListenerInterface {
         }
 
         // Check access token
-        $event->getManager()->trigger('checkAccessToken');
+        $event->getManager()->trigger('auth.accesstoken');
+
+        // Check that the public key has access to the users
+        $this->validateAccess($event, $users);
 
         // Build query params array
         $queryParams = [
@@ -230,7 +306,7 @@ class MetadataOperations implements ListenerInterface {
 
         // Query backend using the AST
         $backendResponse = $this->backend->search(
-            $request->getPublicKey(),
+            $users,
             $ast,
             $queryParams
         );
