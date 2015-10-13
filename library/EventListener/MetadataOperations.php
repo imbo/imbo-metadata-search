@@ -156,10 +156,10 @@ class MetadataOperations implements ListenerInterface {
 
         // Pass image data to the search backend
         $this->backend->set(
-            $request->getPublicKey(),
+            $request->getUser(),
             $imageIdentifier,
             [
-                'publicKey' => $request->getPublicKey(),
+                'user' => $request->getUser(),
                 'size' => $image->getFilesize(),
                 'extension' => $image->getExtension(),
                 'mime' => $image->getMimeType(),
@@ -191,11 +191,9 @@ class MetadataOperations implements ListenerInterface {
     public function search(EventInterface $event) {
         $request = $event->getRequest();
         $params = $request->query;
+        $user = $request->getUser();
 
-        // Users to get images for
-        $users = [$request->getUser()];
-
-        $this->searchHandler($event, $users);
+        $this->searchHandler($event, [$user]);
     }
 
     /**
@@ -206,9 +204,11 @@ class MetadataOperations implements ListenerInterface {
      public function globalSearch(EventInterface $event) {
         $request = $event->getRequest();
         $params = $request->query;
-
-        // Users to get images for
         $users = $request->getUsers();
+
+        if (empty($users)) {
+            throw new RuntimeException('One or more users must be specified', 400);
+        }
 
         $this->searchHandler($event, $users);
      }

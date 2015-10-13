@@ -207,11 +207,11 @@ class FeatureContext extends RESTContext implements Context, SnippetAcceptingCon
     }
 
     /**
-     * @When /^I search in images belonging to the users (\[[^\]]+\]) using (.*?)$/
+     * @When /^I search in images belonging to the users "(.*?)" using (.*?)$/
      */
     public function iSearchInImagesBelongingToTheUsersUsingMetadata($users, $metadata)
     {
-        $this->setQueryParam('user', json_decode($users));
+        $this->setQueryParam('user', array_filter(array_map('trim', explode(',', $users))));
 
         try {
             $this->rawRequest('/images', 'SEARCH', $this->queryParams, $metadata);

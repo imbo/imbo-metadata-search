@@ -84,15 +84,22 @@ Feature: Use elasticsearch as search backend for the metadata search pluin
         | {"size":"desc"}                | red-panda,kitten |
         | {"width":"desc","size":"desc"} | kitten,red-panda |
 
+    Scenario: Search globally with metadata without specifying a user
+        Given I use "publickey" and "privatekey" for public and private keys
+        And I include an access token in the query
+        When I search in images belonging to the users "" using {"foo":"bar"}
+        Then I should get a response with "400 One or more users must be specified"
+
     Scenario Outline: Search across multiple users using the global search
         Given I use "publickey" and "privatekey" for public and private keys
         And I include an access token in the query
         And I sort by {"sort":"asc"}
-        When I search in images belonging to the users <users> using <metadata>
+        When I search in images belonging to the users "<users>" using <metadata>
         Then I should get a response with "200 OK"
         And I should get <images> in the image response list
 
         Examples:
-        | users                  | metadata                          | images             |
-        | ["publickey", "user1"] | {"animal":{"$in":["cat", "dog"]}} | kitten,prairie-dog |
-        | ["user1", "user2"]     | {"animal":{"$in":["dog"]}}        | prairie-dog        |
+        | users           | metadata                          | images             |
+        | publickey       | {"animal":{"$in":["cat", "dog"]}} | kitten             |
+        | publickey,user1 | {"animal":{"$in":["cat", "dog"]}} | kitten,prairie-dog |
+        | user1           | {"animal":{"$in":["dog"]}}        | prairie-dog        |

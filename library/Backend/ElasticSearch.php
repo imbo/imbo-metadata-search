@@ -78,6 +78,9 @@ class ElasticSearch implements SearchBackendInterface {
             $sort
         );
 
+        // Set which users to get images from
+        $params = $this->addUserFilter($params, $users);
+
         // Set page and limit
         $params = $this->setPageAndLimit(
             $params,
@@ -144,7 +147,7 @@ class ElasticSearch implements SearchBackendInterface {
             $rangeFilter['range']['added']['lte'] = $to;
         }
 
-        $params['body']['query']['filtered']['filter'][] = $rangeFilter;
+        $params['body']['query']['filtered']['filter']['and'][] = $rangeFilter;
 
         return $params;
     }
@@ -152,11 +155,12 @@ class ElasticSearch implements SearchBackendInterface {
     /**
      * Add user filter to params
      *
+     * @param array $params Params array
      * @param array $users Users to filter on
      * @return array Modified params array
      */
-    protected function addUserFilter(array $users) {
-        $params['body']['query']['filtered']['filter'][] = [
+    protected function addUserFilter(array $params, array $users) {
+        $userFilter = [
             'or' => array_map(function($user) {
                 return [
                     'term' => [
@@ -166,6 +170,8 @@ class ElasticSearch implements SearchBackendInterface {
             }, $users)
         ];
 
+        $params['body']['query']['filtered']['filter']['and'][] = $userFilter;
+
         return $params;
     }
 
@@ -173,10 +179,10 @@ class ElasticSearch implements SearchBackendInterface {
      * Creates a params array that can be consumed by the elasticsearch client
      *
      * @param string $imageIdentifier
-     * @param array $metadata
+     * @param array $query
      * @return array
      */
-    protected function prepareParams($imageIdentifier = null, $body = null, $sort = []) {
+    protected function prepareParams($imageIdentifier = null, $query = null, $sort = []) {
         $params = [
             'index' => $this->getIndexName(),
             'type' => 'metadata',
@@ -187,8 +193,18 @@ class ElasticSearch implements SearchBackendInterface {
             $params['id'] = $imageIdentifier;
         }
 
-        if ($body !== null) {
-            $params['body'] = array_merge($params['body'], $body);
+        if ($query !== null) {
+            $params['body'] = array_merge($params['body'], $query);
+        }
+
+        if (isset($params['body']['query']['filtered']['filter'][0])) {
+            $params['body']['query']['filtered']['filter'] = [
+                'and' => [
+                    $params['body']['query']['filtered']['filter'][0]
+                ]
+            ];
+        } else {
+            $params['body']['query']['filtered']['filter'] = ['and' => []];
         }
 
         if ($sort) {
