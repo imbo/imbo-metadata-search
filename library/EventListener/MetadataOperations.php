@@ -214,6 +214,38 @@ class MetadataOperations implements ListenerInterface {
      }
 
     /**
+     * Check that public key has access to the users
+     *
+     * @param Imbo\EventListener\ListenerInterface $event
+     * @param array $user Array of user strings
+     */
+    protected function validateAccess(EventInterface $event, array $users) {
+        $acl = $event->getAccessControl();
+
+        $missingAccess = [];
+
+        foreach ($users as $user) {
+            $hasAccess = $acl->hasAccess(
+                $event->getRequest()->getPublicKey(),
+                'images.get',
+                $user
+            );
+            if (!$hasAccess) {
+                $missingAccess[] = $user;
+            }
+        }
+
+        if (!empty($missingAccess)) {
+            throw new RuntimeException(
+                'Public key does not have access to the users: [' .
+                implode(', ', $missingAccess) .
+                ']',
+                400
+            );
+        }
+    }
+
+    /**
      * Handle metadata search operation
      *
      * page     => Page number. Defaults to 1
@@ -241,6 +273,9 @@ class MetadataOperations implements ListenerInterface {
 
         // Check access token
         $event->getManager()->trigger('auth.accesstoken');
+
+        // Check that the public key has access to the users
+        $this->validateAccess($event, $users);
 
         // Build query params array
         $queryParams = [

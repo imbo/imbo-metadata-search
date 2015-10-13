@@ -90,6 +90,12 @@ Feature: Use elasticsearch as search backend for the metadata search pluin
         When I search in images belonging to the users "" using {"foo":"bar"}
         Then I should get a response with "400 One or more users must be specified"
 
+    Scenario: Search for the images of a user the publickey does not have access to
+        Given I use "publickey" and "privatekey" for public and private keys
+        And I include an access token in the query
+        When I search in images belonging to the users "random-user" using {"foo":"bar"}
+        Then I should get a response with "400 Public key does not have access to the users: [random-user]"
+
     Scenario Outline: Search across multiple users using the global search
         Given I use "publickey" and "privatekey" for public and private keys
         And I include an access token in the query
