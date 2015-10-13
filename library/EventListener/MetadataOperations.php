@@ -50,6 +50,13 @@ class MetadataOperations implements ListenerInterface {
         ];
     }
 
+    /**
+     * Get image data for a given image identifier
+     *
+     * @param Imbo\EventListener\ListenerInterface $event
+     * @param array $imageIdentifier Image identifier of image to get data about
+     * @return Imbo\Model\Image
+     */
     public function getImageData($event, $imageIdentifier) {
         $image = new ImageModel();
 
@@ -76,15 +83,15 @@ class MetadataOperations implements ListenerInterface {
      * the order of the imageIdentifiers in the second argument
      *
      * @param $responseModel Response containing the images
-     * @param string[] List of identifiers as returned from backend
+     * @param array List of image identifiers as returned from backend
      * @return void
      */
-    public function sortSearchResponse($responseModel, $identifiers) {
+    public function sortSearchResponse($responseModel, $imageIdentifiers) {
         $images = $responseModel->getImages();
 
         $result = [];
         foreach ($images as $image) {
-           $key = array_search($image->getImageIdentifier(), $identifiers);
+           $key = array_search($image->getImageIdentifier(), $imageIdentifiers);
            $result[$key] = $image;
         }
 
@@ -214,10 +221,10 @@ class MetadataOperations implements ListenerInterface {
      }
 
     /**
-     * Check that public key has access to the users
+     * Check that the public key has access to the users
      *
      * @param Imbo\EventListener\ListenerInterface $event
-     * @param array $user Array of user strings
+     * @param array $users Array of user strings
      */
     protected function validateAccess(EventInterface $event, array $users) {
         $acl = $event->getAccessControl();
@@ -256,7 +263,7 @@ class MetadataOperations implements ListenerInterface {
      * to       => Unit timestamp to fetch to
      *
      * @param Imbo\EventListener\ListenerInterface $event The current event
-     * @param string[] Array with image identifiers
+     * @param array $users Array with image identifiers
      */
     protected function searchHandler(EventInterface $event, array $users) {
         $request = $event->getRequest();
