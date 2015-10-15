@@ -139,7 +139,7 @@ class FeatureContext extends RESTContext implements Context, SnippetAcceptingCon
     /**
      * @Then Elasticsearch should not have metadata for the :imageName image
      */
-    public function elasticsearchShouldNotMetadataFor($imageName)
+    public function elasticsearchShouldNotHaveMetadataFor($imageName)
     {
         $publicKey = 'publickey';
 
