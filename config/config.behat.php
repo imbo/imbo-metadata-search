@@ -4,7 +4,8 @@ namespace Imbo\MetadataSearch;
 
 use Imbo\Auth\AccessControl as ACL;
 
-$config = [
+$config = require __DIR__ . '/../vendor/imbo/imbo/config/config.default.php';
+$config = array_replace_recursive($config, [
     'accessControl' => function() {
         return new ACL\Adapter\ArrayAdapter([
             [
@@ -42,20 +43,7 @@ $config = [
         ]);
     },
 
-    'contentNegotiateImages' => true,
-
     'eventListeners' => [
-        'accessToken' => 'Imbo\EventListener\AccessToken',
-        'auth' => 'Imbo\EventListener\Authenticate',
-        'statsAccess' => [
-            'listener' => 'Imbo\EventListener\StatsAccess',
-            'params' => [
-                'allow' => ['127.0.0.1', '::1'],
-            ],
-        ],
-
-        'imagick' => 'Imbo\EventListener\Imagick',
-
         'metadata' => [
             'listener' => new EventListener\MetadataOperations([
                 'backend' => new Backend\ElasticSearch(
@@ -65,18 +53,6 @@ $config = [
             ])
         ],
     ],
-
-    'resources' => [],
-
-    'routes' => [],
-
-    'eventListenerInitializers' => [
-        'imagick' => 'Imbo\EventListener\Initializer\Imagick',
-    ],
-
-    'transformationPresets' => [],
-
-    'trustedProxies' => [],
-];
+]);
 
 return $config;
