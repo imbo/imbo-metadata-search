@@ -49,7 +49,11 @@ class ElasticSearch implements SearchBackendInterface {
      * {@inheritdoc}
      */
     public function delete($user, $imageIdentifier) {
-        $params = $this->prepareParams($imageIdentifier);
+        $params = [
+            'index' => $this->getIndexName(),
+            'type' => 'metadata',
+            'id' => $imageIdentifier
+        ];
 
         try {
             return !!$this->client->delete($params);

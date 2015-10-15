@@ -126,9 +126,9 @@ class FeatureContext extends RESTContext implements Context, SnippetAcceptingCon
     }
 
     /**
-     * @Then Elasticsearch should not have metadata for the :imageName image
+     * @Then Elasticsearch should have an empty metadata object for the :imageName image
      */
-    public function elasticsearchShouldNotHaveMetadataFor($imageName)
+    public function elasticsearchShouldHaveAnEmptyMetadataObjectFor($imageName)
     {
         $this->elasticsearchShouldHaveTheFollowingMetadataFor(
             $imageName,
@@ -137,11 +137,42 @@ class FeatureContext extends RESTContext implements Context, SnippetAcceptingCon
     }
 
     /**
+     * @Then Elasticsearch should not have metadata for the :imageName image
+     */
+    public function elasticsearchShouldNotHaveMetadataFor($imageName)
+    {
+        $publicKey = 'publickey';
+
+        $params = [
+            'index' => 'metadatasearch_integration',
+            'type' => 'metadata',
+            'id' => $this->images[$imageName]
+        ];
+
+        $exception;
+        try {
+            $this->elasticsearch->get($params);
+        } catch (Exception $e) {
+            $exception = $e;
+        }
+
+        Assertion::isInstanceOf($exception, 'Elasticsearch\Common\Exceptions\Missing404Exception');
+    }
+
+    /**
      * @When I delete metadata from the :imageName image
      */
     public function deleteMetadataFromImage($imageName)
     {
         $this->imbo->deleteMetadata($this->images[$imageName]);
+    }
+
+    /**
+     * @When I delete the :imageName image
+     */
+    public function deleteImage($imageName)
+    {
+        $this->imbo->deleteImage($this->images[$imageName]);
     }
 
     /**
