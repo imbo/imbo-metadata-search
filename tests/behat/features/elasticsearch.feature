@@ -28,11 +28,17 @@ Feature: Use elasticsearch as search backend for the metadata search pluin
         {"foo":"bar"}
         """
 
+    Scenario: Deleting an image
+        Given I use "publickey" and "privatekey" for public and private keys
+        When I delete the "giant-panda" image
+        Then I should get a response with "200 OK"
+        And Elasticsearch should not have metadata for the "giant-panda" image
+
     Scenario: Deleting metadata
         Given I use "publickey" and "privatekey" for public and private keys
         When I delete metadata from the "giant-panda" image
         Then I should get a response with "200 OK"
-        And Elasticsearch should not have metadata for the "giant-panda" image
+        And Elasticsearch should have an empty metadata object for the "giant-panda" image
 
     Scenario: Patch metadata
         Given I use "publickey" and "privatekey" for public and private keys
