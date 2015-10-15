@@ -66,7 +66,7 @@ $ curl 'http://imbo/users/<user>/images?limit=1&metadata=1' -d '{"foo": "bar"}'
 **Querying multiple users**
 
 ```sh
-$ curl 'http://imbo/images?users[]=<user1>&user[]=<user2>&limit=1&metadata=1' -d '{"foo": "bar"}'
+$ curl 'http://imbo/images?users[]=<user1>&users[]=<user2>&limit=1&metadata=1' -d '{"foo": "bar"}'
 ```
 
 Both these requests results in a response that looks like this:
