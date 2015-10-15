@@ -242,7 +242,7 @@ class FeatureContext extends RESTContext implements Context, SnippetAcceptingCon
      */
     public function iSearchInImagesBelongingToTheUsersUsingMetadata($users, $metadata)
     {
-        $this->setQueryParam('user', array_filter(array_map('trim', explode(',', $users))));
+        $this->setQueryParam('users', array_filter(array_map('trim', explode(',', $users))));
 
         try {
             $this->rawRequest('/images', 'SEARCH', $this->queryParams, $metadata);
