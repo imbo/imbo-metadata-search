@@ -20,7 +20,7 @@
     "repositories": [
         {
             "type": "vcs",
-            "url": "git@github.com:kbrabrand/imbo.git"
+            "url": "git@github.com:imbo/imbo.git"
         }
     ],
     "require": {
