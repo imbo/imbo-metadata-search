@@ -61,14 +61,14 @@ class MetadataOperations implements ListenerInterface {
         $image = new ImageModel();
 
         $event->getDatabase()->load(
-            $event->getRequest()->getPublicKey(),
+            $event->getRequest()->getUser(),
             $imageIdentifier,
             $image
         );
 
         // Get image metadata
         $metadata = $event->getDatabase()->getMetadata(
-            $event->getRequest()->getPublicKey(),
+            $event->getRequest()->getUser(),
             $imageIdentifier
         );
 
@@ -187,7 +187,7 @@ class MetadataOperations implements ListenerInterface {
     public function delete(EventInterface $event) {
         $request = $event->getRequest();
 
-        $this->backend->delete($request->getPublicKey(), $request->getImageIdentifier());
+        $this->backend->delete($request->getUser(), $request->getImageIdentifier());
     }
 
     /**
