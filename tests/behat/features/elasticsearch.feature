@@ -5,14 +5,14 @@ Feature: Use elasticsearch as search backend for the metadata search pluin
     Background:
         Given I use "publickey" and "privatekey" for public and private keys
         And I add the following images to Imbo:
-            | file          | metadata                              |
+            | file          | metadata                                        |
             | red-panda     | {"sort":1, "animal":"Red Panda", "color":"red"} |
             | giant-panda   | {"sort":2, "animal":"Giant Panda"}              |
             | hedgehog      | {"sort":3, "animal":"Hedgehog"}                 |
             | kitten        | {"sort":4, "animal":"Cat", "color":"red"}       |
         And I use "user1" and "privatekey" for public and private keys
         And I add the following images to Imbo:
-            | file          | metadata                                      |
+            | file          | metadata                                        |
             | prairie-dog   | {"sort":5, "animal":"Dog"}                      |
         And I have flushed the elasticsearch transaction log
 
@@ -79,7 +79,7 @@ Feature: Use elasticsearch as search backend for the metadata search pluin
         And I should get <images> in the image response list
 
         Examples:
-        | sort                           | images                                                    |
+        | sort                           | images           |
         | {"size":"asc"}                 | kitten,red-panda |
         | {"size":"desc"}                | red-panda,kitten |
         | {"width":"desc","size":"desc"} | kitten,red-panda |
