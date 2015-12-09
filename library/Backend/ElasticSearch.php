@@ -7,7 +7,8 @@ use Imbo\MetadataSearch\Dsl\Transformations\ElasticSearchDsl,
     Imbo\MetadataSearch\Interfaces\DslAstInterface,
     Imbo\MetadataSearch\Model\ElasticsearchResponse,
     Elasticsearch\Client as ElasticsearchClient,
-    Imbo\Exception\RuntimeException;
+    Imbo\Exception\RuntimeException,
+    Exception;
 
 /**
  * Elasticsearch search backend for metadata search
