@@ -37,7 +37,8 @@ class ElasticSearch implements SearchBackendInterface {
             $this->options = array_replace_recursive($this->options, $options);
         }
 
-        if (empty($this->getIndexName())) {
+        $indexName = $this->getIndexName();
+        if (empty($indexName)) {
             throw new RuntimeException(
                 'Index name for elasticsearch metadata search backend must be given',
                 503
