@@ -38,7 +38,10 @@ class ElasticSearch implements SearchBackendInterface {
         }
 
         if (empty($this->getIndexName())) {
-            throw new RuntimeException('Index name for elasticsearch metadata backend must be given', 503);
+            throw new RuntimeException(
+                'Index name for elasticsearch metadata search backend must be given',
+                503
+            );
         }
     }
 
@@ -237,6 +240,11 @@ class ElasticSearch implements SearchBackendInterface {
         return $params;
     }
 
+    /**
+     * Get the configured name of the index to use
+     * 
+     * @return String
+     */
     public function getIndexName() {
         return $this->options['index']['name'];
     }
