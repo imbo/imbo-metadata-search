@@ -21,6 +21,7 @@ before_install:
   - printf "\n" | pecl install imagick-3.4.0RC3
 before_script:
   - "mkdir -p build/logs && touch build/logs/httpd.log"
+  - echo "extension = imagick.so" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
   - echo "extension = mongo.so" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
   - echo "extension = memcached.so" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
   - composer self-update
