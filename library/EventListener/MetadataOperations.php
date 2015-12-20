@@ -197,7 +197,6 @@ class MetadataOperations implements ListenerInterface {
      */
     public function search(EventInterface $event) {
         $request = $event->getRequest();
-        $params = $request->query;
         $user = $request->getUser();
 
         $this->searchHandler($event, [$user]);
@@ -210,7 +209,6 @@ class MetadataOperations implements ListenerInterface {
      */
      public function globalSearch(EventInterface $event) {
         $request = $event->getRequest();
-        $params = $request->query;
         $users = $request->getUsers();
 
         if (empty($users)) {
