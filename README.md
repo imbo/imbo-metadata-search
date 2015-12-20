@@ -13,7 +13,7 @@ In addition to the metadata search plugin you'll need a search backend client. R
 {
     "require": {
         "imbo/imbo-metadata-search": "dev-master",
-        "elasticsearch/elasticsearch": "~1.3"
+        "elasticsearch/elasticsearch": "~2.1"
     }
 }
 ```
@@ -30,28 +30,28 @@ The `image.delete` event triggers a delete in the indexed object in the search b
 
 The data provided to the backend are;
 
-| Data        | Description           |
-| ------------- |:-------------|
-| `publicKey` | The publickey "owning" the image |
-| `size` | Byte size of image. |
-| `extension` | File extension. |
-| `mime` | Mime type of file. |
-| `metadata` | Image metadata. |
-| `added` | Timestamp representation of when the image was added. |
-| `updated` | Timestamp representation of when the image was last updated. |
-| `width` | Width of image in pixels. |
-| `height` | Height of image in pixels. |
+| Data          | Description                                                  |
+| ------------- |:------------------------------------------------------------ |
+| `user`        | The user "owning" the image                                  |
+| `size`        | Byte size of image                                           |
+| `extension`   | File extension                                               |
+| `mime`        | Mime type of file                                            |
+| `metadata`    | Image metadata                                               |
+| `added`       | Timestamp representation of when the image was added         |
+| `updated`     | Timestamp representation of when the image was last updated  |
+| `width`       | Width of image in pixels                                     |
+| `height`      | Height of image in pixels                                    |
 
 ## Querying
 Querying is done by issuing an HTTP SEARCH request to `/users/<user>/images` if you want to search in the images of a single user, or `/images` if you want to search across multiple users. Supported query parameters are:
 
-| Param | Description |
-| ----- | ----------- |
-| `page` | The page number. Defaults to 1. |
-| `limit` | Number of images per page. Defaults to 20. |
+| Param      | Description |
+| ---------- | ----------- |
+| `page`     | The page number. Defaults to 1. |
+| `limit`    | Number of images per page. Defaults to 20. |
 | `metadata` | Whether or not to include metadata in the output. Defaults to 0, set to 1 to enable. |
 | `fields[]` | An array with fields to display. When not specified all fields will be displayed. |
-| `sort[]` | An array with fields to sort by. The direction of the sort is specified by appending asc or desc to the field, delimited by :. If no direction is specified asc will be used. Example: ?sort[]=size&sort[]=width:desc is the same as ?sort[]=size:asc&sort[]=width:desc. If no sort is specified the search backend will rank by relevance. |
+| `sort[]`   | An array with fields to sort by. The direction of the sort is specified by appending asc or desc to the field, delimited by :. If no direction is specified asc will be used. Example: ?sort[]=size&sort[]=width:desc is the same as ?sort[]=size:asc&sort[]=width:desc. If no sort is specified the search backend will rank by relevance. |
 
 The query is sent in the request body.
 

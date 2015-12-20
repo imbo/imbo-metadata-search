@@ -4,14 +4,14 @@ Feature: Use elasticsearch as search backend for the metadata search pluin
 
     Background:
         Given I use "publickey" and "privatekey" for public and private keys
-        And I add the following images to Imbo:
+        And I add the following images to the user named "user":
             | file          | metadata                                        |
+            | kitten        | {"sort":4, "animal":"Cat", "color":"red"}       |
             | red-panda     | {"sort":1, "animal":"Red Panda", "color":"red"} |
             | giant-panda   | {"sort":2, "animal":"Giant Panda"}              |
             | hedgehog      | {"sort":3, "animal":"Hedgehog"}                 |
-            | kitten        | {"sort":4, "animal":"Cat", "color":"red"}       |
-        And I use "user1" and "privatekey" for public and private keys
-        And I add the following images to Imbo:
+        And I use "user2" and "privatekey" for public and private keys
+        And I add the following images to the user named "user2":
             | file          | metadata                                        |
             | prairie-dog   | {"sort":5, "animal":"Dog"}                      |
         And I have flushed the elasticsearch transaction log
@@ -53,7 +53,7 @@ Feature: Use elasticsearch as search backend for the metadata search pluin
         """
 
     Scenario: Search single users images without using an access token
-        When I search for images from "publickey" using {"animal":"Snake"}
+        When I search for images from "user" using {"animal":"Snake"}
         Then I should get a response with "400 Missing access token"
 
     Scenario Outline: Search in a single users images using metadata queries and pagination
@@ -61,8 +61,8 @@ Feature: Use elasticsearch as search backend for the metadata search pluin
         And I include an access token in the query
         And I set the "limit" query param to "<limit>"
         And I set the "page" query param to "<page>"
-        And I sort by {"sort":"asc"}
-        When I search for images from "publickey" using <metadata>
+        And I sort by {"metadata.sort":"asc"}
+        When I search for images from "user" using <metadata>
         Then I should get a response with "200 OK"
         And I should get <images> in the image response list
         And the hit count should be "<hits>"
@@ -76,11 +76,31 @@ Feature: Use elasticsearch as search backend for the metadata search pluin
         | {"color":"red"}                | 2    | 1     | kitten           | 2    |
         | {"animal":"Cat","color":"red"} | 1    | 20    | kitten           | 1    |
 
+    Scenario Outline: Search on sub-object in descending order using metadata queries and pagination
+        Given I use "publickey" and "privatekey" for public and private keys
+        And I include an access token in the query
+        And I set the "limit" query param to "<limit>"
+        And I set the "page" query param to "<page>"
+        And I sort by {"metadata.sort":"desc"}
+        When I search for images from "user" using <metadata>
+        Then I should get a response with "200 OK"
+        And I should get <images> in the image response list
+        And the hit count should be "<hits>"
+
+        Examples:
+        | metadata                       | page | limit | images           | hits |
+        | {"animal":"Snake"}             | 1    | 20    |                  | 0    |
+        | {"animal":"Hedgehog"}          | 1    | 20    | hedgehog         | 1    |
+        | {"color":"red"}                | 1    | 20    | kitten,red-panda | 2    |
+        | {"color":"red"}                | 1    | 1     | kitten           | 2    |
+        | {"color":"red"}                | 2    | 1     | red-panda        | 2    |
+        | {"animal":"Cat","color":"red"} | 1    | 20    | kitten           | 1    |
+
     Scenario Outline: Search and sort the search result
         Given I use "publickey" and "privatekey" for public and private keys
         And I include an access token in the query
         And I sort by <sort>
-        When I search for images from "publickey" using {"color":"red"}
+        When I search for images from "user" using {"color":"red"}
         Then I should get a response with "200 OK"
         And I should get <images> in the image response list
 
@@ -105,13 +125,13 @@ Feature: Use elasticsearch as search backend for the metadata search pluin
     Scenario Outline: Search across multiple users using the global search
         Given I use "publickey" and "privatekey" for public and private keys
         And I include an access token in the query
-        And I sort by {"sort":"asc"}
+        And I sort by {"metadata.sort":"asc"}
         When I search in images belonging to the users "<users>" using <metadata>
         Then I should get a response with "200 OK"
         And I should get <images> in the image response list
 
         Examples:
-        | users           | metadata                          | images             |
-        | publickey       | {"animal":{"$in":["cat", "dog"]}} | kitten             |
-        | publickey,user1 | {"animal":{"$in":["cat", "dog"]}} | kitten,prairie-dog |
-        | user1           | {"animal":{"$in":["dog"]}}        | prairie-dog        |
+        | users      | metadata                          | images             |
+        | user       | {"animal":{"$in":["cat", "dog"]}} | kitten             |
+        | user,user2 | {"animal":{"$in":["cat", "dog"]}} | kitten,prairie-dog |
+        | user2      | {"animal":{"$in":["dog"]}}        | prairie-dog        |

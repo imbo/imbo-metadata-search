@@ -127,7 +127,7 @@ class MetadataOperations implements ListenerInterface {
                 $dir = 'asc';
             }
 
-            return [$key => $dir];
+            return [$key => ['order' => $dir]];
         }, $sortParams);
 
         // Filter empty keys
