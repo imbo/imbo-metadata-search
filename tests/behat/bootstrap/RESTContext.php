@@ -86,9 +86,11 @@ class RESTContext implements Context
      * Create a new HTTP client
      */
     private function createClient() {
-        $this->imbo = new ImboClient($this->params['url'], [
+        $this->imbo = ImboClient::factory([
+            'serverUrls' => [$this->params['url']],
             'publicKey' => 'publickey',
             'privateKey' => 'privatekey',
+            'user' => 'user',
         ]);
 
         $eventDispatcher = $this->imbo->getEventDispatcher();
@@ -265,6 +267,7 @@ class RESTContext implements Context
         $this->imbo->setConfig([
             'publicKey' => $publicKey,
             'privateKey' => $privateKey,
+            'user' => 'user',
         ]);
     }
 

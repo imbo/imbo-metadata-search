@@ -7,17 +7,16 @@ use Behat\Gherkin\Node\PyStringNode;
 use Behat\Gherkin\Node\TableNode;
 use Behat\Gherkin\Node\StepNode;
 use Assert\Assertion;
-use Elasticsearch\Client as ElasticsearchClient;
+use Elasticsearch\ClientBuilder;
 
 /**
  * Defines application features from the specific context.
  */
-class FeatureContext extends RESTContext implements Context, SnippetAcceptingContext
-{
+class FeatureContext extends RESTContext implements Context, SnippetAcceptingContext {
     public function __construct($url, $documentRoot, $router, $httpdLog, $timeout) {
         parent::__construct($url, $documentRoot, $router, $httpdLog, $timeout);
 
-        $this->elasticsearch = new ElasticsearchClient();
+        $this->elasticsearch = ClientBuilder::create()->build();
         $this->images = [];
     }
 
@@ -32,7 +31,7 @@ class FeatureContext extends RESTContext implements Context, SnippetAcceptingCon
         $mongo->metadatasearch_integration_storage->drop();
 
         // Delete the elasticsearch metadata test index
-        $elasticsearch = new ElasticsearchClient();
+        $elasticsearch = ClientBuilder::create()->build();
 
         try {
             $elasticsearch->indices()->delete([
@@ -57,19 +56,20 @@ class FeatureContext extends RESTContext implements Context, SnippetAcceptingCon
     }
 
     /**
-     * @Given I add the following images to Imbo:
+     * @Given I add the following images to the user named :user:
      */
-    public function theFollowingImagesExistInImbo(TableNode $images)
-    {
+    public function theFollowingImagesExistInImbo($user, TableNode $images) {
         foreach ($images as $image) {
-            $this->addImageToImbo($image['file'], json_decode($image['metadata'], true));
+            $this->addImageToImbo($image['file'], $user, json_decode($image['metadata'], true));
         }
     }
 
     /**
-     * @Given /^"([^"]*)" exists in Imbo with metadata (.*)$/
+     * @Given /^"([^"]*)" exists under the "([^"]*)" user with metadata (.*)$/
      */
-    public function addImageToImbo($imageName, $metadata) {
+    public function addImageToImbo($imageName, $user, $metadata) {
+        $this->imbo->setUser($user);
+
         $res = $this->imbo->addImage('tests/fixtures/' . $imageName . '.jpg');
 
         // Add image to images var so we have a way of looking them up later
@@ -94,8 +94,7 @@ class FeatureContext extends RESTContext implements Context, SnippetAcceptingCon
     /**
      * @Given I patch the metadata of the :imageName image with:
      */
-    public function iPatchTheMetadataOfTheImageWithIdentifierWith($imageName, PyStringNode $metadata)
-    {
+    public function iPatchTheMetadataOfTheImageWithIdentifierWith($imageName, PyStringNode $metadata) {
         if ($metadata instanceof PyStringNode) {
             $metadata = json_decode($metadata, true);
         }
@@ -106,10 +105,7 @@ class FeatureContext extends RESTContext implements Context, SnippetAcceptingCon
     /**
      * @Then /^Elasticsearch should have the following metadata for the "([^"]*)" image:$/
      */
-    public function elasticsearchShouldHaveTheFollowingMetadataFor($imageName, PyStringNode $metadata)
-    {
-        $publicKey = 'publickey';
-
+    public function elasticsearchShouldHaveTheFollowingMetadataFor($imageName, PyStringNode $metadata) {
         $params = [
             'index' => 'metadatasearch_integration',
             'type' => 'metadata',
@@ -128,8 +124,7 @@ class FeatureContext extends RESTContext implements Context, SnippetAcceptingCon
     /**
      * @Then Elasticsearch should have an empty metadata object for the :imageName image
      */
-    public function elasticsearchShouldHaveAnEmptyMetadataObjectFor($imageName)
-    {
+    public function elasticsearchShouldHaveAnEmptyMetadataObjectFor($imageName) {
         $this->elasticsearchShouldHaveTheFollowingMetadataFor(
             $imageName,
             new PyStringNode(['[]'], null)
@@ -139,10 +134,7 @@ class FeatureContext extends RESTContext implements Context, SnippetAcceptingCon
     /**
      * @Then Elasticsearch should not have metadata for the :imageName image
      */
-    public function elasticsearchShouldNotHaveMetadataFor($imageName)
-    {
-        $publicKey = 'publickey';
-
+    public function elasticsearchShouldNotHaveMetadataFor($imageName) {
         $params = [
             'index' => 'metadatasearch_integration',
             'type' => 'metadata',
@@ -162,16 +154,14 @@ class FeatureContext extends RESTContext implements Context, SnippetAcceptingCon
     /**
      * @When I delete metadata from the :imageName image
      */
-    public function deleteMetadataFromImage($imageName)
-    {
+    public function deleteMetadataFromImage($imageName) {
         $this->imbo->deleteMetadata($this->images[$imageName]);
     }
 
     /**
      * @When I delete the :imageName image
      */
-    public function deleteImage($imageName)
-    {
+    public function deleteImage($imageName) {
         $this->imbo->deleteImage($this->images[$imageName]);
     }
 
@@ -190,8 +180,7 @@ class FeatureContext extends RESTContext implements Context, SnippetAcceptingCon
     /**
      * @Then /^I should get (.*?) in the image response list$/
      */
-    public function imagesShouldExistInTheResponseList($imageNames)
-    {
+    public function imagesShouldExistInTheResponseList($imageNames) {
         $responseBody = $this->getLastResponse()->json();
 
         // Build list of expected values
@@ -218,8 +207,7 @@ class FeatureContext extends RESTContext implements Context, SnippetAcceptingCon
     /**
      * @Then the hit count should be :hits
      */
-    public function theHitCountShouldBe($hits)
-    {
+    public function theHitCountShouldBe($hits) {
         $body = $this->getLastResponse()->json();
 
         Assertion::eq($body['search']['hits'], $hits);
@@ -228,8 +216,7 @@ class FeatureContext extends RESTContext implements Context, SnippetAcceptingCon
     /**
      * @When /^I search for images from "(.*?)" using (.*?)$/
      */
-    public function iSearchForImagesUsing($user, $metadata)
-    {
+    public function iSearchForImagesUsing($user, $metadata) {
         try {
             $this->rawRequest('/users/' . $user . '/images', 'SEARCH', $this->queryParams, $metadata);
         } catch (Exception $e) {
@@ -240,8 +227,7 @@ class FeatureContext extends RESTContext implements Context, SnippetAcceptingCon
     /**
      * @When /^I search in images belonging to the users "(.*?)" using (.*?)$/
      */
-    public function iSearchInImagesBelongingToTheUsersUsingMetadata($users, $metadata)
-    {
+    public function iSearchInImagesBelongingToTheUsersUsingMetadata($users, $metadata) {
         $this->setQueryParam('users', array_filter(array_map('trim', explode(',', $users))));
 
         try {

@@ -21,13 +21,29 @@ class ElasticSearch implements SearchBackendInterface {
     protected $client;
 
     /**
-     * @var string
+     * @var array
      */
-    protected $indexName;
+    protected $options = [
+        'index' => ['name' => 'imbo_metadata'],
+        'sort' => [],
+    ];
 
-    public function __construct(ElasticsearchClient $client, $indexName = 'imbo_metadata') {
+    public function __construct(ElasticsearchClient $client, $options = null) {
         $this->client = $client;
-        $this->indexName = $indexName;
+
+        if (is_string($options)) {
+            $this->options['index']['name'] = $options;
+        } else if (is_array($options)) {
+            $this->options = array_replace_recursive($this->options, $options);
+        }
+
+        $indexName = $this->getIndexName();
+        if (empty($indexName)) {
+            throw new RuntimeException(
+                'Index name for elasticsearch metadata search backend must be given',
+                503
+            );
+        }
     }
 
     /**
@@ -37,7 +53,7 @@ class ElasticSearch implements SearchBackendInterface {
         $params = $this->prepareParams($imageIdentifier, $imageData);
 
         try {
-            return !!$this->client->index($params);
+            return (bool) $this->client->index($params);
         } catch (Exception $e) {
             trigger_error('Elasticsearch metadata indexing failed for image: ' . $imageIdentifier, E_USER_WARNING);
 
@@ -56,7 +72,7 @@ class ElasticSearch implements SearchBackendInterface {
         ];
 
         try {
-            return !!$this->client->delete($params);
+            return (bool) $this->client->delete($params);
         } catch (Exception $e) {
             trigger_error('Elasticsearch metadata deletion failed for image: ' . $imageIdentifier, E_USER_WARNING);
 
@@ -102,7 +118,9 @@ class ElasticSearch implements SearchBackendInterface {
         try {
             $queryResult = $this->client->search($params);
         } catch (\Exception $e) {
-            throw new RuntimeException('Metadata search failed: ' . $e->getMessage(), 503);
+            $error = 'Metadata search failed: ' . $e->getMessage();
+            trigger_error($error, E_USER_WARNING);
+            throw new RuntimeException($error, 503);
         }
 
         // Create and return search response model
@@ -212,13 +230,23 @@ class ElasticSearch implements SearchBackendInterface {
         }
 
         if ($sort) {
-            $params['body']['sort'] = $sort;
+            $sortOptions = $this->options['sort'];
+            $params['body']['sort'] = array_map(function($sortGroup) use ($sortOptions) {
+                return array_map(function($sortSpec) use ($sortOptions) {
+                    return array_merge($sortOptions, $sortSpec);
+                }, $sortGroup);
+            }, $sort);
         }
 
         return $params;
     }
 
+    /**
+     * Get the configured name of the index to use
+     * 
+     * @return String
+     */
     public function getIndexName() {
-        return $this->indexName;
+        return $this->options['index']['name'];
     }
 }
