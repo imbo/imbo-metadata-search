@@ -7,7 +7,8 @@ use Imbo\MetadataSearch\Dsl\Transformations\ElasticSearchDsl,
     Imbo\MetadataSearch\Interfaces\DslAstInterface,
     Imbo\MetadataSearch\Model\ElasticsearchResponse,
     Elasticsearch\Client as ElasticsearchClient,
-    Imbo\Exception\RuntimeException;
+    Imbo\Exception\RuntimeException,
+    Exception;
 
 /**
  * Elasticsearch search backend for metadata search
@@ -117,7 +118,7 @@ class ElasticSearch implements SearchBackendInterface {
 
         try {
             $queryResult = $this->client->search($params);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $error = 'Metadata search failed: ' . $e->getMessage();
             trigger_error($error, E_USER_WARNING);
             throw new RuntimeException($error, 503);
