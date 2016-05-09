@@ -22,7 +22,7 @@ class BackendResponse implements ModelInterface {
      *
      * @var int
      */
-    private $hits;
+    private $hits = 0;
 
     /**
      * Set the image identifiers
@@ -64,5 +64,15 @@ class BackendResponse implements ModelInterface {
      */
     public function getHits() {
         return $this->hits;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getData() {
+        return [
+            'hits' => $this->getHits(),
+            'imageIdentifiers' => $this->getImageIdentifiers(),
+        ];
     }
 }
