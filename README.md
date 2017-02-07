@@ -18,6 +18,8 @@ In addition to the metadata search plugin you'll need a search backend client. R
 }
 ```
 
+The elasticsearch plugin requires that your elasticsearch server is at least version 2.0.
+
 ### Metadata search setup
 In order for the metadata search plugin to be registered and actually do something usedful for your Imbo installation you need to add a config file which declares the routes, resource and event listeners.
 

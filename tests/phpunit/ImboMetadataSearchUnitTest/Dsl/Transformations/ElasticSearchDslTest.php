@@ -12,34 +12,102 @@ class ElasticSearchDslTest extends \PHPUnit_Framework_TestCase {
         $this->transformation = new ElasticSearchDsl();
     }
 
-    protected function buildExpectedQuery($query = [], $filters = []) {
-        return [
-            'query' => [
-                'filtered' => [
-                    'query' => $query,
-                    'filter' => $filters
-                ]
-            ]
-        ];
-    }
-
     public function getQueries() {
         return [
-            'a simple query' => [
+            'a single match-query' => [
                 'query' => '{"foo": "bar"}',
-                'expected' => $this->buildExpectedQuery(['match' => ['metadata.foo' => 'bar']], []),
+                'expected' => [
+                    'query' => [
+                        'bool' => [
+                            'must' => [
+                                ['match' => ['metadata.foo' => 'bar']]
+                            ]
+                        ]
+                    ]
+                ]
             ],
-            'another simple query' => [
+            'two match-queries combined using and' => [
                 'query' => '{"foo": "bar", "baz": "blargh"}',
-                'expected' => $this->buildExpectedQuery([], [['and' => [
-                                                                ['query' => ['match' => ['metadata.foo' => 'bar']]],
-                                                                ['query' => ['match' => ['metadata.baz' => 'blargh']]],
-                                                            ]]]),
+                'expected' => [
+                    'query' => [
+                        'bool' => [
+                            'must' => [
+                                ['match' => ['metadata.foo' => 'bar']],
+                                ['match' => ['metadata.baz' => 'blargh']]
+                            ]
+                        ]
+                    ]
+                ]
             ],
-            'a simple less-than query' => [
+            'a less-than query' => [
                 'query' => '{"foo": {"$lt": 5}}',
-                'expected' => $this->buildExpectedQuery([], [['range' => ['metadata.foo' => ['lt' => 5]]]]),
+                'expected' => [
+                    'query' => [
+                        'bool' => [
+                            'must' => [
+                                ['range' => ['metadata.foo' => ['lt' => 5]]]
+                            ]
+                        ]
+                    ]
+                ]
             ],
+            'an or-query' => [
+                'query' => '{"$or": [{"foo": "bar"}, {"baz": "blargh"}]}',
+                'expected' => [
+                    'query' => [
+                        'bool' => [
+                            'should' => [
+                                ['match' => ['metadata.foo' => 'bar']],
+                                ['match' => ['metadata.baz' => 'blargh']]
+                            ]
+                        ]
+                    ]
+                ]
+            ],
+            'a not-in-query' => [
+                'query' => '{"foo": {"$nin": ["bar", "baz"]}}',
+                'expected' => [
+                    'query' => [
+                        'bool' => [
+                            'must_not' => [
+                                'terms' => [
+                                    'metadata.foo' => ['bar', 'baz']
+                                ]
+                            ]
+                        ]
+                    ]
+                ]
+            ],
+            'a terribly complex query' => [
+                'query' => '{
+                    "name": {"$ne": "Wit"},
+                    "$or": [
+                        {"brewery": "Nøgne Ø"},
+                        {"$and": [
+                            {"abv": {"$gte": 5.5}},
+                            {"style": {"$in": ["IPA", "Imperial Stout"]}},
+                            {"brewery": {"$in": ["HaandBryggeriet", "Ægir"]}}
+                        ]}
+                    ]
+                }',
+                'expected' => [
+                    'query' => [
+                        'bool' => [
+                            'must' => [
+                                ['bool' => ['must_not' => ['match' => ['metadata.name' => 'Wit']]]],
+                                ['bool' => ['should' => [
+                                    ['match' => ['metadata.brewery' => 'Nøgne Ø']],
+                                    ['bool' => ['must' => [
+                                        ['range' => ['metadata.abv' => ['gte' => 5.5]]],
+                                        ['terms' => ['metadata.style' => ['IPA', 'Imperial Stout']]],
+                                        ['terms' => ['metadata.brewery' => ['HaandBryggeriet', 'Ægir']]]
+                                    ]]]
+                                ]]]
+                            ]
+                        ]
+                    ]
+                ]
+            ]
         ];
     }
 
