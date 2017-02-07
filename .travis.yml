@@ -6,6 +6,12 @@ branches:
   only:
     - develop
     - master
+addons:
+  apt:
+    sources:
+      - elasticsearch-2.x
+    packages:
+      elasticsearch
 services:
   - mongodb
   - memcached
