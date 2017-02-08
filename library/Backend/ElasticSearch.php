@@ -56,7 +56,7 @@ class ElasticSearch implements SearchBackendInterface {
         try {
             return (bool) $this->client->index($params);
         } catch (Exception $e) {
-            trigger_error('Elasticsearch metadata indexing failed for image: ' . $imageIdentifier, E_USER_WARNING);
+            trigger_error('Elasticsearch metadata indexing failed for image: ' . $imageIdentifier . '. Reason: ' . $e->getMessage(), E_USER_WARNING);
 
             return false;
         }
@@ -75,7 +75,7 @@ class ElasticSearch implements SearchBackendInterface {
         try {
             return (bool) $this->client->delete($params);
         } catch (Exception $e) {
-            trigger_error('Elasticsearch metadata deletion failed for image: ' . $imageIdentifier, E_USER_WARNING);
+            trigger_error('Elasticsearch metadata deletion failed for image: ' . $imageIdentifier . '. Reason: ' . $e->getMessage(), E_USER_WARNING);
 
             return false;
         }
