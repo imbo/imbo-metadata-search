@@ -59,7 +59,8 @@ class ElasticSearchDslTest extends \PHPUnit_Framework_TestCase {
                             'should' => [
                                 ['match' => ['metadata.foo' => 'bar']],
                                 ['match' => ['metadata.baz' => 'blargh']]
-                            ]
+                            ],
+                            'minimum_should_match' => 1
                         ]
                     ]
                 ]
@@ -95,14 +96,17 @@ class ElasticSearchDslTest extends \PHPUnit_Framework_TestCase {
                         'bool' => [
                             'must' => [
                                 ['bool' => ['must_not' => ['match' => ['metadata.name' => 'Wit']]]],
-                                ['bool' => ['should' => [
-                                    ['match' => ['metadata.brewery' => 'Nøgne Ø']],
-                                    ['bool' => ['must' => [
-                                        ['range' => ['metadata.abv' => ['gte' => 5.5]]],
-                                        ['terms' => ['metadata.style' => ['IPA', 'Imperial Stout']]],
-                                        ['terms' => ['metadata.brewery' => ['HaandBryggeriet', 'Ægir']]]
-                                    ]]]
-                                ]]]
+                                ['bool' => [
+                                    'should' => [
+                                        ['match' => ['metadata.brewery' => 'Nøgne Ø']],
+                                        ['bool' => ['must' => [
+                                            ['range' => ['metadata.abv' => ['gte' => 5.5]]],
+                                            ['terms' => ['metadata.style' => ['IPA', 'Imperial Stout']]],
+                                            ['terms' => ['metadata.brewery' => ['HaandBryggeriet', 'Ægir']]]
+                                        ]]]
+                                    ],
+                                    'minimum_should_match' => 1
+                                ]]
                             ]
                         ]
                     ]

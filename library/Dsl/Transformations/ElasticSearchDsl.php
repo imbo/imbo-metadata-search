@@ -65,11 +65,16 @@ class ElasticSearchDsl implements DslTransformationInterface {
         switch (true) {
             case $query instanceof Conjunction:
                 // We map conjunctions into `and`-filters.
-                return ['bool' => ['must' => array_map([$this, 'transformAstToQuery'], $query->getArrayCopy())]];
+                return ['bool' => [
+                    'must' => array_map([$this, 'transformAstToQuery'], $query->getArrayCopy())
+                ]];
 
             case $query instanceof Disjunction:
                 // ... and disjunctions into `or`-filters
-                return ['bool' => ['should' => array_map([$this, 'transformAstToQuery'], $query->getArrayCopy())]];
+                return ['bool' => [
+                    'should' => array_map([$this, 'transformAstToQuery'], $query->getArrayCopy()),
+                    'minimum_should_match' => 1
+                ]];
 
             case $query instanceof Field:
                 // We have a field, so let's look at the type of comparison we
