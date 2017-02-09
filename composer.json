@@ -39,5 +39,14 @@
         "psr-4": {
             "Imbo\\MetadataSearch\\": "library/"
         }
+    },
+    "scripts": {
+        "phpcs": "phpcs --standard=vendor/imbo/imbo-phpcs-standard/Imbo library",
+        "phpunit": "phpunit --verbose -c tests/phpunit --coverage-html build/coverage --coverage-clover build/logs/clover.xml --log-junit build/logs/junit.xml",
+        "behat": "behat --strict --config tests/behat/behat.yml",
+        "test": [
+            "@phpunit",
+            "@behat"
+        ]
     }
 }
