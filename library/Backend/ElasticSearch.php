@@ -244,7 +244,7 @@ class ElasticSearch implements SearchBackendInterface {
 
     /**
      * Get the configured name of the index to use
-     * 
+     *
      * @return String
      */
     public function getIndexName() {
