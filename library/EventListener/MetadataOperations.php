@@ -91,8 +91,8 @@ class MetadataOperations implements ListenerInterface {
 
         $result = [];
         foreach ($images as $image) {
-           $key = array_search($image->getImageIdentifier(), $imageIdentifiers);
-           $result[$key] = $image;
+            $key = array_search($image->getImageIdentifier(), $imageIdentifiers);
+            $result[$key] = $image;
         }
 
         ksort($result);
@@ -207,7 +207,7 @@ class MetadataOperations implements ListenerInterface {
      *
      * @param Imbo\EventListener\ListenerInterface $event The current event
      */
-     public function globalSearch(EventInterface $event) {
+    public function globalSearch(EventInterface $event) {
         $request = $event->getRequest();
         $users = $request->getUsers();
 
@@ -216,7 +216,7 @@ class MetadataOperations implements ListenerInterface {
         }
 
         $this->searchHandler($event, $users);
-     }
+    }
 
     /**
      * Check that the public key has access to the users
