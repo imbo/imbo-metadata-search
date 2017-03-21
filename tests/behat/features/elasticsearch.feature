@@ -116,6 +116,18 @@ Feature: Use elasticsearch as search backend for the metadata search pluin
         | {"size":"desc"}                | red-panda,kitten |
         | {"width":"desc","size":"desc"} | kitten,red-panda |
 
+    Scenario Outline: Search without supplying a sort parameter sorts by relevance
+        Given I use "publickey" and "privatekey" for public and private keys
+        And I include an access token in the query
+        When I search for images from "user" using <metadata>
+        Then I should get a response with "200 OK"
+        And I should get <images> in the image response list
+
+        Examples:
+        | metadata                                               | images                |
+        | {"$or": [{"animal": "Giant Panda"},{"color":"white"}]} | giant-panda,red-panda |
+        | {"$or": [{"animal": "Red Panda"},{"age":7}]}           | red-panda,giant-panda |
+
     Scenario: Search globally with metadata without specifying a user
         Given I use "publickey" and "privatekey" for public and private keys
         And I include an access token in the query
