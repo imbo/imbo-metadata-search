@@ -32,26 +32,21 @@ class ElasticSearchDsl implements DslTransformationInterface {
         $transformed = $this->transformAstToQuery($query);
 
         switch (key($transformed)) {
-            // A simple query was returned, use it for the query part
-            // of the filtered query and set an empty filter
-            case 'query':
+            // A compound-query was returned, so we simply need to wrap it in
+            // a `query`-clause.
+            case 'bool':
                 return [
-                    'query' => [
-                        'filtered' => [
-                            'query' => $transformed['query'],
-                            'filter' => []
-                        ]
-                    ]
+                    'query' => $transformed,
                 ];
 
             default:
-                // A filter was returned from transformAstToQuery. Add it
-                // to the list of filters and set an empty query.
+                // A simple query was returned. We upcast it to a `bool`-query,
+                // so that it will be easier for the ES backend to add filters
+                // to it (e.g. filter to a specific username).
                 return [
                     'query' => [
-                        'filtered' => [
-                            'query' => [],
-                            'filter' => [
+                        'bool' => [
+                            'must' => [
                                 $transformed
                             ]
                         ]
@@ -70,11 +65,16 @@ class ElasticSearchDsl implements DslTransformationInterface {
         switch (true) {
             case $query instanceof Conjunction:
                 // We map conjunctions into `and`-filters.
-                return ['and' => array_map([$this, 'transformAstToQuery'], $query->getArrayCopy())];
+                return ['bool' => [
+                    'must' => array_map([$this, 'transformAstToQuery'], $query->getArrayCopy())
+                ]];
 
             case $query instanceof Disjunction:
                 // ... and disjunctions into `or`-filters
-                return ['or' => array_map([$this, 'transformAstToQuery'], $query->getArrayCopy())];
+                return ['bool' => [
+                    'should' => array_map([$this, 'transformAstToQuery'], $query->getArrayCopy()),
+                    'minimum_should_match' => 1
+                ]];
 
             case $query instanceof Field:
                 // We have a field, so let's look at the type of comparison we
@@ -86,14 +86,15 @@ class ElasticSearchDsl implements DslTransformationInterface {
                 switch (true) {
                     case $comparison instanceof Equals:
                         // Equality we make into `match`-queries
-                        return ['query' => ['match' =>
+                        return ['match' =>
                             [$field => $comparison->value()]
-                        ]];
+                        ];
 
                     case $comparison instanceof NotEquals:
-                        // And not-equals we make into a not-filter with a
-                        // `match`-filter inside it
-                        return ['not' => ['query' => ['match' =>
+                        // And not-equals we make into a `bool`-filter with a
+                        // `must_not`-clause containing a `match`-qyuery inside
+                        // it
+                        return ['bool' => ['must_not' => ['match' =>
                             [$field => $comparison->value()]
                         ]]];
 
@@ -104,11 +105,11 @@ class ElasticSearchDsl implements DslTransformationInterface {
                         ]];
 
                     case $comparison instanceof NotIn:
-                        // And likewise a not-in into a `not` filter wrapping a
-                        // `terms`-filter.
-                        return ['not' => ['terms' => [
+                        // And likewise a not-in into a `bool`-filter with a
+                        // `must_not`-clause containing a `terms`-filter.
+                        return ['bool' => ['must_not' => ['terms' => [
                             $field => $comparison->value(),
-                        ]]];
+                        ]]]];
 
                     case $comparison instanceof LessThan:
                         // Less-than we do with a `range`-filter

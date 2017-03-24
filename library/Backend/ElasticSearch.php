@@ -56,7 +56,7 @@ class ElasticSearch implements SearchBackendInterface {
         try {
             return (bool) $this->client->index($params);
         } catch (Exception $e) {
-            trigger_error('Elasticsearch metadata indexing failed for image: ' . $imageIdentifier, E_USER_WARNING);
+            trigger_error('Elasticsearch metadata indexing failed for image: ' . $imageIdentifier . '. Reason: ' . $e->getMessage(), E_USER_WARNING);
 
             return false;
         }
@@ -75,7 +75,7 @@ class ElasticSearch implements SearchBackendInterface {
         try {
             return (bool) $this->client->delete($params);
         } catch (Exception $e) {
-            trigger_error('Elasticsearch metadata deletion failed for image: ' . $imageIdentifier, E_USER_WARNING);
+            trigger_error('Elasticsearch metadata deletion failed for image: ' . $imageIdentifier . '. Reason: ' . $e->getMessage(), E_USER_WARNING);
 
             return false;
         }
@@ -170,7 +170,7 @@ class ElasticSearch implements SearchBackendInterface {
             $rangeFilter['range']['added']['lte'] = $to;
         }
 
-        $params['body']['query']['filtered']['filter']['and'][] = $rangeFilter;
+        $params['body']['query']['bool']['filter'][] = $rangeFilter;
 
         return $params;
     }
@@ -183,17 +183,11 @@ class ElasticSearch implements SearchBackendInterface {
      * @return array Modified params array
      */
     protected function addUserFilter(array $params, array $users) {
-        $userFilter = [
-            'or' => array_map(function($user) {
-                return [
-                    'term' => [
-                        'user' => $user
-                    ]
-                ];
-            }, $users)
+        $params['body']['query']['bool']['filter'][] = [
+            'terms' => [
+                'user' => $users,
+            ],
         ];
-
-        $params['body']['query']['filtered']['filter']['and'][] = $userFilter;
 
         return $params;
     }
@@ -218,16 +212,6 @@ class ElasticSearch implements SearchBackendInterface {
 
         if ($query !== null) {
             $params['body'] = array_merge($params['body'], $query);
-        }
-
-        if (isset($params['body']['query']['filtered']['filter'][0])) {
-            $params['body']['query']['filtered']['filter'] = [
-                'and' => [
-                    $params['body']['query']['filtered']['filter'][0]
-                ]
-            ];
-        } else {
-            $params['body']['query']['filtered']['filter'] = ['and' => []];
         }
 
         if ($sort) {

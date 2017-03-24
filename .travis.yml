@@ -13,6 +13,13 @@ branches:
     - develop
     - master
 
+addons:
+  apt:
+    sources:
+      - elasticsearch-2.x
+    packages:
+      elasticsearch
+
 services:
   - mongodb
   - memcached
@@ -25,7 +32,6 @@ before_install:
   - printf "\n" | pecl install --force mongo
   - printf "\n" | pecl install --force mongodb
   - printf "\n" | pecl install --force memcached-2.2.0
-  - printf "\n" | pecl install apcu-4.0.10
   - printf "\n" | pecl install imagick-3.4.0RC3
 
 before_script:
