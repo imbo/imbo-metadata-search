@@ -88,21 +88,21 @@ class ElasticSearchDsl implements DslTransformationInterface {
                     case $comparison instanceof Equals:
                         // Equality we make into `match`-queries
                         if ($comparison->value() === '') {
-                          // Elastic doesn't support matches against empty
-                          // values. Instead we can do something equiv. to it
-                          // using the wildcard- and exists-operator
-                          return ['bool' => [
-                              'must_not' => [
-                                  'wildcard' => [
-                                      $field => '*',
-                                  ],
-                              ],
-                              'must' => [
-                                  ['exists' => [
-                                      'field' => $field,
-                                  ]],
-                              ],
-                          ]];
+                            // Elastic doesn't support matches against empty
+                            // values. Instead we can do something equiv. to it
+                            // using the wildcard- and exists-operator
+                            return ['bool' => [
+                                'must_not' => [
+                                    'wildcard' => [
+                                        $field => '*',
+                                    ],
+                                ],
+                                'must' => [
+                                    ['exists' => [
+                                        'field' => $field,
+                                    ]],
+                                ],
+                            ]];
                         }
 
                         return ['match' =>
@@ -114,13 +114,13 @@ class ElasticSearchDsl implements DslTransformationInterface {
                         // `must_not`-clause containing a `match`-qyuery inside
                         // it
                         if ($comparison->value() === '') {
-                          // Except if you are trying to find something that
-                          // isn't empty - because Elastic doesn't support that
-                          // so we use a wildcard-operator to do something
-                          // equivalent
-                          return ['wildcard' => [
-                              $field => '*',
-                          ]];
+                            // Except if you are trying to find something that
+                            // isn't empty - because Elastic doesn't support that
+                            // so we use a wildcard-operator to do something
+                            // equivalent
+                            return ['wildcard' => [
+                                $field => '*',
+                            ]];
                         }
 
                         return ['bool' => ['must_not' => ['match' =>
