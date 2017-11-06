@@ -183,6 +183,14 @@ Look for values that does not appear in the specified set.
 {"styles":{"$nin":["Pilsner"]}}
 ```
 
+#### Field exists - `$exists`
+
+Ensure that a given field does or does not exist.
+
+```js
+{"age":{"$exists":true}}
+```
+
 #### Conjunctions - `$and`
 
 This operator can be used to combine a list of criteria that must all match. It
