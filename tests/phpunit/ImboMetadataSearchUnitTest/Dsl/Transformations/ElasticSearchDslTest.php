@@ -79,6 +79,67 @@ class ElasticSearchDslTest extends \PHPUnit_Framework_TestCase {
                     ]
                 ]
             ],
+            'Searching for empty strings' => [
+                'query' => '{"foo": ""}',
+                'expected' => [
+                    'query' => [
+                        'bool' => [
+                            'must_not' => [
+                                'wildcard' => [
+                                    'metadata.foo' => '*'
+                                ],
+                            ],
+                            'must' => [
+                                ['exists' => [
+                                    'field' => 'metadata.foo',
+                                ]],
+                            ]
+                        ],
+                    ],
+                ],
+            ],
+            'Searching for not-empty strings' => [
+                'query' => '{"foo": { "$ne": "" }}',
+                'expected' => [
+                    'query' => [
+                        'bool' => [
+                            'must' => [
+                                ['wildcard' => [
+                                    'metadata.foo' => '*'
+                                ]],
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+            'Searching for existing fields' => [
+                'query' => '{"foo": {"$exists": true}}',
+                'expected' => [
+                    'query' => [
+                        'bool' => [
+                            'must' => [
+                                ['exists' => [
+                                    'field' => 'metadata.foo'
+                                ]],
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+            'Searching for non-existing fields' => [
+                'query' => '{"foo": { "$exists": false }}',
+                'expected' => [
+                    'query' => [
+                        'bool' => [
+                            'must_not' => [
+                                'exists' => [
+                                    'field' => 'metadata.foo'
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+            ],
             'a terribly complex query' => [
                 'query' => '{
                     "name": {"$ne": "Wit"},

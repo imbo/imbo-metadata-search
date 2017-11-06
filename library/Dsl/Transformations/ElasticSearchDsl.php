@@ -14,7 +14,8 @@ use Imbo\MetadataSearch\Interfaces\DslTransformationInterface,
     Imbo\MetadataSearch\Dsl\Ast\Comparison\LessThan,
     Imbo\MetadataSearch\Dsl\Ast\Comparison\LessThanEquals,
     Imbo\MetadataSearch\Dsl\Ast\Comparison\GreaterThan,
-    Imbo\MetadataSearch\Dsl\Ast\Comparison\GreaterThanEquals;
+    Imbo\MetadataSearch\Dsl\Ast\Comparison\GreaterThanEquals,
+    Imbo\MetadataSearch\Dsl\Ast\Comparison\Exists;
 
 /**
  * A transformation from our query-DSL into the ElasticSearch-php query-DSL.
@@ -86,6 +87,24 @@ class ElasticSearchDsl implements DslTransformationInterface {
                 switch (true) {
                     case $comparison instanceof Equals:
                         // Equality we make into `match`-queries
+                        if ($comparison->value() === '') {
+                          // Elastic doesn't support matches against empty
+                          // values. Instead we can do something equiv. to it
+                          // using the wildcard- and exists-operator
+                          return ['bool' => [
+                              'must_not' => [
+                                  'wildcard' => [
+                                      $field => '*',
+                                  ],
+                              ],
+                              'must' => [
+                                  ['exists' => [
+                                      'field' => $field,
+                                  ]],
+                              ],
+                          ]];
+                        }
+
                         return ['match' =>
                             [$field => $comparison->value()]
                         ];
@@ -94,6 +113,16 @@ class ElasticSearchDsl implements DslTransformationInterface {
                         // And not-equals we make into a `bool`-filter with a
                         // `must_not`-clause containing a `match`-qyuery inside
                         // it
+                        if ($comparison->value() === '') {
+                          // Except if you are trying to find something that
+                          // isn't empty - because Elastic doesn't support that
+                          // so we use a wildcard-operator to do something
+                          // equivalent
+                          return ['wildcard' => [
+                              $field => '*',
+                          ]];
+                        }
+
                         return ['bool' => ['must_not' => ['match' =>
                             [$field => $comparison->value()]
                         ]]];
@@ -142,6 +171,21 @@ class ElasticSearchDsl implements DslTransformationInterface {
                                 'gte' => $comparison->value(),
                             ],
                         ]];
+
+                    case $comparison instanceof Exists:
+                        if ($comparison->value()) {
+                            return ['exists' => [
+                                'field' => $field,
+                            ]];
+                        } else {
+                            return ['bool' => [
+                                'must_not' => [
+                                    'exists' => [
+                                        'field' => $field,
+                                    ],
+                                ],
+                            ]];
+                        }
                 }
         }
     }
