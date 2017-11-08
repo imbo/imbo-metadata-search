@@ -13,7 +13,8 @@ use Imbo\Exception\InvalidArgumentException,
     Imbo\MetadataSearch\Dsl\Ast\Comparison\LessThan,
     Imbo\MetadataSearch\Dsl\Ast\Comparison\LessThanEquals,
     Imbo\MetadataSearch\Dsl\Ast\Comparison\GreaterThan,
-    Imbo\MetadataSearch\Dsl\Ast\Comparison\GreaterThanEquals;
+    Imbo\MetadataSearch\Dsl\Ast\Comparison\GreaterThanEquals,
+    Imbo\MetadataSearch\Dsl\Ast\Comparison\Exists;
 
 /**
  * Imbo DSL parser
@@ -44,6 +45,7 @@ class Parser {
         '$lte'      => true,
         '$ne'       => true,
         '$nin'      => true,
+        '$exists'   => true,
         '$wildcard' => false, // We want to support this - but not built yet
     ];
 
@@ -179,6 +181,12 @@ class Parser {
                     if (!is_array($value)) {
                         throw new InvalidArgumentException('The operator ' . $key . ' must be called with an array', 400);
                     }
+                } else if (in_array($key, ['$exists'])) {
+                    // If the operator is $exists, we check that the argument
+                    // given is a boolean
+                    if (!is_bool($value)) {
+                        throw new InvalidArgumentException('The operator ' . $key . ' must be called with an boolean', 400);
+                    }
                 } else {
                     // The operator is not working on sets, we the value can't
                     // be an array
@@ -254,6 +262,8 @@ class Parser {
                     return new GreaterThan($value);
                 case '$gte':
                     return new GreaterThanEquals($value);
+                case '$exists':
+                    return new Exists($value);
             }
         } else {
             return new Equals($value);

@@ -13,7 +13,8 @@ use Imbo\MetadataSearch\Dsl\Parser,
     Imbo\MetadataSearch\Dsl\Ast\Comparison\LessThan,
     Imbo\MetadataSearch\Dsl\Ast\Comparison\LessThanEquals,
     Imbo\MetadataSearch\Dsl\Ast\Comparison\GreaterThan,
-    Imbo\MetadataSearch\Dsl\Ast\Comparison\GreaterThanEquals;
+    Imbo\MetadataSearch\Dsl\Ast\Comparison\GreaterThanEquals,
+    Imbo\MetadataSearch\Dsl\Ast\Comparison\Exists;
 
 
 class ParserTest extends \PHPUnit_Framework_TestCase {
@@ -80,6 +81,10 @@ class ParserTest extends \PHPUnit_Framework_TestCase {
                                   new Field('field', new In([1, 2, 3])),
                                   new Field('field', new NotIn([5, 6, 7])),
                               ])
+            ],
+            'exists is accepted with booleans' => [
+                'original' => '{"foo": {"$exists": true}}',
+                'expected' => new Field('foo', new Exists(true))
             ],
             'a larger, more complex query' => [
                 'original' => '{
@@ -154,6 +159,10 @@ class ParserTest extends \PHPUnit_Framework_TestCase {
                 'query' => '{"foo": {"$in": "a string"}}',
                 'message' => 'The operator $in must be called with an array',
             ],
+            'performing an exists on a string' => [
+                'query' => '{"foo": {"$exists": "yes"}}',
+                'message' => 'The operator $exists must be called with an boolean'
+            ]
         ];
     }
 

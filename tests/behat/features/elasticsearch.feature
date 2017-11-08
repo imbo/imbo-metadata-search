@@ -5,15 +5,15 @@ Feature: Use elasticsearch as search backend for the metadata search pluin
     Background:
         Given I use "publickey" and "privatekey" for public and private keys
         And I add the following images to the user named "user":
-            | file          | metadata                                                      |
-            | kitten        | {"sort":4, "animal":"Cat", "color":"red", "age": 5}           |
-            | red-panda     | {"sort":1, "animal":"Red Panda", "color":"red", "age": 7}     |
-            | giant-panda   | {"sort":2, "animal":"Giant Panda", "color":"white", "age": 9} |
-            | hedgehog      | {"sort":3, "animal":"Hedgehog", "color": "brown", "age": 2}   |
+            | file          | metadata                                                                  |
+            | kitten        | {"sort":4, "animal":"Cat", "color":"red", "age": 5, "favorite": "yes"}    |
+            | red-panda     | {"sort":1, "animal":"Red Panda", "color":"red", "age": 7, "favorite": ""} |
+            | giant-panda   | {"sort":2, "animal":"Giant Panda", "color":"white", "age": 9}             |
+            | hedgehog      | {"sort":3, "animal":"Hedgehog", "color": "brown", "age": 2}               |
         And I use "user2" and "privatekey" for public and private keys
         And I add the following images to the user named "user2":
-            | file          | metadata                                                      |
-            | prairie-dog   | {"sort":5, "animal":"Dog", "color":"brown", "age": 4}         |
+            | file          | metadata                                                                  |
+            | prairie-dog   | {"sort":5, "animal":"Dog", "color":"brown", "age": 4}                     |
         And I have flushed the elasticsearch transaction log
 
     Scenario: Updating metadata
@@ -81,6 +81,10 @@ Feature: Use elasticsearch as search backend for the metadata search pluin
         | {"age": {"$lte": 5}}                         | 1    | 20    | hedgehog,kitten       | 2    |
         | {"age": {"$gt": 7}}                          | 1    | 20    | giant-panda           | 1    |
         | {"age": {"$gte": 7}}                         | 1    | 20    | red-panda,giant-panda | 2    |
+        | {"favorite": ""}                             | 1    | 20    | red-panda             | 1    |
+        | {"favorite": {"$ne": ""}}                    | 1    | 20    | kitten                | 1    |
+        | {"favorite": {"$exists": true}}              | 1    | 20    | red-panda,kitten      | 2    |
+        | {"favorite": {"$exists": false}}             | 1    | 20    | giant-panda,hedgehog  | 2    |
 
     Scenario Outline: Search on sub-object in descending order using metadata queries and pagination
         Given I use "publickey" and "privatekey" for public and private keys
